@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<don_kham>
+	<thong_tin_ca_nhan>
+		<benhnhan_id></benhnhan_id>
+		<ten_benh_nhan></ten_benh_nhan>
+		<ngay_sinh></ngay_sinh>
+	</thong_tin_ca_nhan>
+	<phe_dung>
+		<FVC></FVC>
+		<FEV1></FEV1>
+		<PEF></PEF>
+	</phe_dung>
+</don_kham>

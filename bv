@@ -1,0 +1,13 @@
+<VirtualHost *:80>
+    DocumentRoot /var/www/html/bv/public
+    ServerName bv.test
+    <Directory /var/www/html/bv/public>
+        Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        allow from all
+    </Directory>
+    ErrorLog /var/log/apache2/bv.com-error_log
+    CustomLog /var/log/apache2/bv.com-access_log common
+</VirtualHost>
+
