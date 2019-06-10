@@ -70,15 +70,13 @@ Sổ khám sức khỏe
                data-url="{{ route('history-json') }}">
             <thead>
                 <tr>
-
-                    <th data-field="name"
-                        data-formatter="nameFormatter">Tên loại khám</th>
                     <th data-field="medical_date"
                         data-formatter="dateFormatter">Ngày khám</th>
                     <th data-field="status" data-formatter="statusFormatter">Trạng thái</th>
                     <th data-field="id"
                         data-formatter="operateFormatter"
                         data-events="operateEvents">Xem chi tiết</th>
+                    <th data-field="id" data-sortable="false" data-formatter="buttonCheckMedicalApplication">Kiểm tra</th>
                 </tr>
             </thead>
         </table>
@@ -111,6 +109,8 @@ Sổ khám sức khỏe
                     </table>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="checkMedicalApplication($('#medical_application_id').val())">Kiểm tra</button>
+                    <input type="hidden" id="medical_application_id">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -141,6 +141,8 @@ Sổ khám sức khỏe
                     </table>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="checkMedicalApplication($('#medical_application_id').val())">Kiểm tra</button>
+                    <input type="hidden" id="medical_application_id">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -185,6 +187,7 @@ Sổ khám sức khỏe
                 $table.bootstrapTable('refresh', {
                     url: '../../patient/detail.json/' + value
                 });
+                $('#medical_application_id').attr("value", value);
             },
             'click .like2': function (e, value, row) {
 
@@ -253,6 +256,18 @@ Sổ khám sức khỏe
             return[
                 value.substring(0, 10)
             ]
+        }
+        function buttonCheckMedicalApplication(value, row, index) {
+            return [
+                '<button class="btn btn-default" onClick="checkMedicalApplication(',
+                value,
+                ')">Kiểm tra</button>'
+            ].join('');
+        }
+        function checkMedicalApplication(id) {
+            $.get( '/checkMedicalApplication/' + id, function (data) {
+                alert(data);
+            });
         }
     </script>		
 

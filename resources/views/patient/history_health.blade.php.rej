@@ -1,0 +1,37 @@
+diff a/resources/views/patient/history_health.blade.php b/resources/views/patient/history_health.blade.php	(rejected hunks)
+@@ -79,6 +79,7 @@ Sổ khám sức khỏe
+                     <th data-field="id"
+                         data-formatter="operateFormatter"
+                         data-events="operateEvents">Xem chi tiết</th>
++                    <th data-field="id" data-sortable="false" data-formatter="buttonCheckMedicalApplication">Kiểm tra</th>
+                 </tr>
+             </thead>
+         </table>
+@@ -185,6 +188,7 @@ Sổ khám sức khỏe
+                 $table.bootstrapTable('refresh', {
+                     url: '../../patient/detail.json/' + value
+                 });
++                $('#medical_application_id').attr("value", value);
+             },
+             'click .like2': function (e, value, row) {
+ 
+@@ -254,6 +258,18 @@ Sổ khám sức khỏe
+                 value.substring(0, 10)
+             ]
+         }
++        function buttonCheckMedicalApplication(value, row, index) {
++            return [
++                '<button class="btn btn-default" onClick="checkMedicalApplication(',
++                value,
++                ')">Kiểm tra</button>'
++            ].join('');
++        }
++        function checkMedicalApplication(id) {
++            $.get(baseUrl + '/checkMedicalApplication/' + id, function (data) {
++                alert(data);
++            });
++        }
+     </script>		
+ 
+     @stop
+\ No newline at end of file

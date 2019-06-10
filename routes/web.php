@@ -373,6 +373,12 @@ Route::group(['prefix' => 'doctor', 'middleware' => 'web'], function () {
 
 Route::post('remove-medical-application', 'PatientController@removeMedical');
 
+Route::group(['middleware' => 'auth'], function() {
+        Route::get('checkMedicalApplication/{id}','HomeController@checkMedicalApplication');
+        Route::get('checkCOPDApplication/{id}','HomeController@checkCOPDApplication');
+        Route::get('checkMedicalTestApplication/{id}','HomeController@checkMedicalTestApplication');
+});
+
 Route::post('share', 'OAuthController@postShare')->name('oauth-share');
 
 

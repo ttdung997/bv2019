@@ -78,6 +78,7 @@ Lịch sử xét nghiệm
                     <th data-field="id"
                         data-formatter="operateFormatter2"
                         data-events="operateEvents">Xem chi tiết</th>
+                    <th data-field="id" data-sortable="false" data-formatter="buttonCheckMedicalTestApplication">Kiểm tra</th>
                 </tr>
             </thead>
         </table>
@@ -110,6 +111,8 @@ Lịch sử xét nghiệm
                     </table>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="checkMedicalTestApplication($('#medical_test_application_id').val())">Kiểm tra</button>
+                    <input type="hidden" id="medical_test_application_id">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -140,6 +143,8 @@ Lịch sử xét nghiệm
                     </table>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="checkMedicalTestApplication($('#medical_test_application_id').val())">Kiểm tra</button>
+                    <input type="hidden" id="medical_test_application_id">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -184,6 +189,7 @@ Lịch sử xét nghiệm
                 $table.bootstrapTable('refresh', {
                     url: '../../patient/detail.json/' + value
                 });
+                $('#medical_test_application_id').attr("value", value);
             },
             'click .like2': function (e, value, row) {
 
@@ -252,6 +258,18 @@ Lịch sử xét nghiệm
             return[
                 value.substring(0, 10)
             ]
+        }
+        function buttonCheckMedicalTestApplication(value, row, index) {
+            return [
+                '<button class="btn btn-default" onClick="checkMedicalTestApplication(',
+                value,
+                ')">Kiểm tra</button>'
+            ].join('');
+        }
+        function checkMedicalTestApplication(id) {
+            $.get(baseUrl + '/checkMedicalTestApplication/' + id, function (data) {
+                alert(data);
+            });
         }
     </script>		
 

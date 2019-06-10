@@ -21,6 +21,7 @@ use File;
 use Session;
 use Image;
 use Storage;
+// use patient;
 use App\OAuth\OAuthorization;
 use App\RBACController\MedicialManagement;
 use App\RBACController\PatientManagement;
@@ -208,7 +209,7 @@ class PatientController extends Controller {
     }
 
     public function history_as_json() {
-        $medical_list = MedicalApplication::where('patient_id', Auth::user()->id)->get();
+        $medical_list = MedicalApplication::select('id','medical_date','status')->where('patient_id', Auth::user()->id)->get();
         return $medical_list;
     }
 
@@ -253,15 +254,21 @@ class PatientController extends Controller {
     public function medical_app_detail_as_json($id) {
         $medical = MedicalApplication::where('id', $id)->first();
 
+        $method = config('encrypt.method');
+        $global_key = base64_decode(config('encrypt.key'));
+        $iv = base64_decode(config('encrypt.iv'));
         try {
+
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-
-
-
+        $key = MedicalApplication::where('id', $id)->first()->xml_key;
+        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+          
         $medical_application_xml = simplexml_load_string($contents);
+            
 
 
 // Chứng thực người dùng có quyền truy cập đơn khám hay không.
@@ -277,16 +284,22 @@ class PatientController extends Controller {
     public function medical_test_detail_as_json($id) {
         $medical = MedicalTestApplication::where('id', $id)->first();
 
+        $method = config('encrypt.method');
+        $global_key = base64_decode(config('encrypt.key'));
+        $iv = base64_decode(config('encrypt.iv'));
+
         try {
+
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-
-
-
-
+        $key = MedicalApplication::where('id', $id)->first()->xml_key;
+        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+          
         $medical_application_xml = simplexml_load_string($contents);
+            
         $data = ((array) $medical_application_xml);
         return view('json.test')->with($data);
 

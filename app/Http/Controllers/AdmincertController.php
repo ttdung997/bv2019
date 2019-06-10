@@ -188,7 +188,7 @@ class AdmincertController extends Controller
                 ];
                 // Generate a new private (and public) key pair
                 $privkey = openssl_pkey_new([
-                    'private_key_bits' => 4096,
+                    'private_key_bits' => 2048,
                     'private_key_type' => OPENSSL_KEYTYPE_RSA,
                     'encrypt_key'      => true,
                 ]);

@@ -11,6 +11,7 @@ use App\Http\Requests\MedicalApplicationRequest;
 use App\Model\MedicalApplication;
 use App\Model\MedicalSpecialistApplication;
 use App\Model\MedicalTestApplication;
+use App\Model\Certificate;
 use App\Model\Patient;
 use App\User;
 use App\Model\Role;
@@ -384,10 +385,52 @@ class DoctorController extends Controller {
         $medical_id = $request->input('medicalID');
 
         if ($oauth->checkResource($medical_id)) {
-            $medical = MedicalApplication::where('id', $medical_id)->first();
-            $contents = Storage::get($medical->url);
-            $medical_application_xml = simplexml_load_string($contents);
+            $inputCertificate = $request->input('certificate');
+            $pemCertificate = chunk_split($inputCertificate, 64, "\n");
+            $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
+            // print_r(openssl_x509_parse($pemCertificate)['serialNumberHex']);
+            // die();
+            $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumberHex'])->first();
+            $doctorId = Auth::id();
+            $signature = $request->input('signatureValue');
+            $signDatetime = $request->input('signDatetime');
 
+            if(is_null($certificate))
+                return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
+
+            if($certificate->status != 0)
+                return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã bị thu hồi!', 'message_level' => 'danger']);
+
+            if($certificate->user_id != $doctorId)
+                return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký không thuộc về bác sĩ!', 'message_level' => 'danger']);
+
+            $from = strtotime($certificate->valid_from_time);
+            $to = strtotime($certificate->valid_to_time);
+            $now = time();
+            if($from > $now || $to < $now)
+                return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã hết hạn!', 'message_level' => 'danger']);
+
+            $medical = MedicalApplication::where('id', $medical_id)->first();
+
+            $method = config('encrypt.method');
+            $global_key = base64_decode(config('encrypt.key'));
+            $iv = base64_decode(config('encrypt.iv'));
+
+
+
+
+            try {
+
+                $contents = Storage::get($medical->url);
+            } catch (\Exception $e) {
+                return "Không tìm thấy file đơn khám";
+            }
+            $key = MedicalApplication::where('id', $medical_id)->first()->xml_key;
+            $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+            $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+              
+            $medical_application_xml = simplexml_load_string($contents);
+            
             if ($oauth->checkPermission(Permission::TL_PERMISSION)) {
                 $chieu_cao = $request->input('chieu_cao');
                 $medical_application_xml->kham_the_luc->chieu_cao = $chieu_cao;
@@ -395,6 +438,11 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_the_luc->can_nang = $can_nang;
                 $huyet_ap = $request->input('huyet_ap');
                 $medical_application_xml->kham_the_luc->huyet_ap = $huyet_ap;
+
+                $medical_application_xml->kham_the_luc->chu_ky = $signature;
+                $medical_application_xml->kham_the_luc->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_the_luc->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_the_luc->chung_thu_ky = $certificate->id;
             }
 
             if ($oauth->checkPermission(Permission::NK_PERMISSION)) {
@@ -437,6 +485,11 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_lam_sang->noi_khoa->tam_than = $tam_than;
                 $phan_loai_tam_than = $request->input('phan_loai_tam_than');
                 $medical_application_xml->kham_lam_sang->noi_khoa->phan_loai_tam_than = $phan_loai_tam_than;
+
+                $medical_application_xml->kham_lam_sang->noi_khoa->chu_ky = $signature;
+                $medical_application_xml->kham_lam_sang->noi_khoa->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_lam_sang->noi_khoa->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_lam_sang->noi_khoa->chung_thu_ky = $certificate->id;
             }
 
             if ($oauth->checkPermission(Permission::MAT_PERMISSION)) {
@@ -448,6 +501,11 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_lam_sang->mat->benh_neu_co = $benh_ve_mat;
                 $phan_loai_mat = $request->input('phan_loai_mat');
                 $medical_application_xml->kham_lam_sang->mat->phan_loai = $phan_loai_mat;
+
+                $medical_application_xml->kham_lam_sang->mat->chu_ky = $signature;
+                $medical_application_xml->kham_lam_sang->mat->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_lam_sang->mat->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_lam_sang->mat->chung_thu_ky = $certificate->id;
             }
 
             if ($oauth->checkPermission(Permission::TMH_PERMISSION)) {
@@ -459,6 +517,11 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_lam_sang->tai_mui_hong->benh_neu_co = $benh_ve_mat;
                 $phan_loai_tai_mui_hong = $request->input('phan_loai_tai_mui_hong');
                 $medical_application_xml->kham_lam_sang->tai_mui_hong->phan_loai = $phan_loai_tai_mui_hong;
+
+                $medical_application_xml->kham_lam_sang->tai_mui_hong->chu_ky = $signature;
+                $medical_application_xml->kham_lam_sang->tai_mui_hong->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_lam_sang->tai_mui_hong->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_lam_sang->tai_mui_hong->chung_thu_ky = $certificate->id;
             }
 
             if ($oauth->checkPermission(Permission::RHM_PERMISSION)) {
@@ -468,11 +531,24 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_lam_sang->rang_ham_mat->ham_duoi = $ham_duoi;
                 $phan_loai_rang_ham_mat = $request->input('phan_loai_rang_ham_mat');
                 $medical_application_xml->kham_lam_sang->rang_ham_mat->phan_loai = $phan_loai_rang_ham_mat;
+
+                $medical_application_xml->kham_lam_sang->rang_ham_mat->chu_ky = $signature;
+                $medical_application_xml->kham_lam_sang->rang_ham_mat->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_lam_sang->rang_ham_mat->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_lam_sang->rang_ham_mat->chung_thu_ky = $certificate->id;
             }
 
             if ($oauth->checkPermission(Permission::DL_PERMISSION)) {
                 $phan_loai_da_lieu = $request->input('phan_loai_da_lieu');
                 $medical_application_xml->kham_lam_sang->da_lieu->phan_loai = $phan_loai_da_lieu;
+
+                $medical_application_xml->kham_lam_sang->da_lieu->chu_ky = $signature;
+                $medical_application_xml->kham_lam_sang->da_lieu->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_lam_sang->da_lieu->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_lam_sang->da_lieu->chung_thu_ky = $certificate->id;
+
+
+;
             }
 
             if ($oauth->checkPermission(Permission::CLS_PERMISSION)) {
@@ -480,6 +556,11 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_can_lam_sang->ket_qua = $ket_qua;
                 $danh_gia = $request->input('danh_gia');
                 $medical_application_xml->kham_can_lam_sang->danh_gia = $danh_gia;
+
+                $medical_application_xml->kham_can_lam_sang->chu_ky = $signature;
+                $medical_application_xml->kham_can_lam_sang->bac_si_ky = $doctorId;
+                $medical_application_xml->kham_can_lam_sang->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->kham_can_lam_sang->chung_thu_ky = $certificate->id;
             }
 
             if ($oauth->checkPermission(Permission::TQ_PERMISSION)) {
@@ -487,6 +568,12 @@ class DoctorController extends Controller {
                 $medical_application_xml->ket_luan->phan_loai = $phan_loai;
                 $benh_neu_co = $request->input('benh_neu_co');
                 $medical_application_xml->ket_luan->benh_neu_co = $benh_neu_co;
+
+                $medical_application_xml->ket_luan->chu_ky = $signature;
+                $medical_application_xml->ket_luan->bac_si_ky = $doctorId;
+                $medical_application_xml->ket_luan->thoi_diem_ky = $signDatetime;
+                $medical_application_xml->ket_luan->chung_thu_ky = $certificate->id;
+
                 if ($benh_neu_co) {
                     $medical->status = 0;
                     $medical->save();

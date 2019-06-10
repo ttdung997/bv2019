@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Model\MedicalApplication;
 use App\Model\MedicalTestApplication;
 use App\Model\MedicalSpecialistApplication;
+use App\Model\Certificate;
 use App\Model\Permission;
 use App\Model\Role;
 use App\Model\Patient;
@@ -534,6 +535,28 @@ class StaffController extends Controller {
 
 //ghi dữ liệu xét nghiệm
     public function updateTestMedicalInfo(Request $request) {
+        $inputCertificate = $request->input('certificate');
+        $pemCertificate = chunk_split($inputCertificate, 64, "\n");
+        $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
+        $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumber'])->first();
+        $staffId = Auth::id();
+        $signature = $request->input('signatureValue');
+        $signDatetime = $request->input('signDatetime');
+
+        if(is_null($certificate))
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
+
+        if($certificate->status != 0)
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã bị thu hồi!', 'message_level' => 'danger']);
+
+        if($certificate->user_id != $staffId)
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký không thuộc về nhân viên!', 'message_level' => 'danger']);
+
+        $from = strtotime($certificate->valid_from_time);
+        $to = strtotime($certificate->valid_to_time);
+        $now = time();
+        if($from > $now || $to < $now)
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã hết hạn!', 'message_level' => 'danger']);
 
         $medical_id = $request->input('medicalID');
         $medical = MedicalTestApplication::join('medical_test_type', 'medical_test_applications.xetnghiem', '=', 'medical_test_type.id')
@@ -549,6 +572,12 @@ class StaffController extends Controller {
         $medical_application_xml->kham_the_luc->can_nang = $can_nang;
         $huyet_ap = $request->input('huyet_ap');
         $medical_application_xml->kham_the_luc->huyet_ap = $huyet_ap;
+
+        $medical_application_xml->kham_the_luc->chu_ky = $signature;
+        $medical_application_xml->kham_the_luc->nhan_vien_ky = $staffId;
+        $medical_application_xml->kham_the_luc->thoi_diem_ky = $signDatetime;
+        $medical_application_xml->kham_the_luc->chung_thu_ky = $certificate->id;
+
         $check = $request->input('checkSubmit');
 
         $method = config('encrypt.method');
@@ -584,6 +613,28 @@ class StaffController extends Controller {
     }
 
     public function updateCOPDTestMedicalInfo(Request $request) {
+        $inputCertificate = $request->input('certificate');
+        $pemCertificate = chunk_split($inputCertificate, 64, "\n");
+        $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
+        $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumber'])->first();
+        $staffId = Auth::id();
+        $signature = $request->input('signatureValue');
+        $signDatetime = $request->input('signDatetime');
+
+        if(is_null($certificate))
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
+
+        if($certificate->status != 0)
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã bị thu hồi!', 'message_level' => 'danger']);
+
+        if($certificate->user_id != $staffId)
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký không thuộc về nhân viên!', 'message_level' => 'danger']);
+
+        $from = strtotime($certificate->valid_from_time);
+        $to = strtotime($certificate->valid_to_time);
+        $now = time();
+        if($from > $now || $to < $now)
+            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã hết hạn!', 'message_level' => 'danger']);
 
         $medical_id = $request->input('medicalID');
         $medical = MedicalTestApplication::join('medical_test_type', 'medical_test_applications.xetnghiem', '=', 'medical_test_type.id')
@@ -608,6 +659,11 @@ class StaffController extends Controller {
         $medical_application_xml->phe_dung->FEV1 = $FEV1;
         $PEF = $request->input('PEF');
         $medical_application_xml->phe_dung->PEF = $PEF;
+
+        $medical_application_xml->phe_dung->chu_ky = $signature;
+        $medical_application_xml->phe_dung->nhan_vien_ky = $staffId;
+        $medical_application_xml->phe_dung->thoi_diem_ky = $signDatetime;
+        $medical_application_xml->phe_dung->chung_thu_ky = $certificate->id;
 
         $id = $request->input('id');
         $medical_application_xml->thong_tin_ca_nhan->benhnhan_id = $id;
