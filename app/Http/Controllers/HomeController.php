@@ -293,7 +293,7 @@ class HomeController extends Controller
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-        $key = MedicalApplication::where('id', $id)->first()->xml_key;
+        $key = MedicalTestApplication::where('id', $id)->first()->xml_key;
         $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
         $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
           

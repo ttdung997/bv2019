@@ -294,14 +294,15 @@ class PatientController extends Controller {
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-        $key = MedicalApplication::where('id', $id)->first()->xml_key;
+        $key = MedicalTestApplication::where('id', $id)->first()->xml_key;
         $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
         $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
           
         $medical_application_xml = simplexml_load_string($contents);
             
         $data = ((array) $medical_application_xml);
-        return view('json.test')->with($data);
+        return view('json.COPD')->with($data);
+        // print_r($data);
 
 // Chứng thực người dùng có quyền truy cập đơn khám hay không.
 //        if (Auth::user()->id == $medical->user_id) {
@@ -348,7 +349,7 @@ class PatientController extends Controller {
         }
 
 
-        $medical_application_xml = simplexml_load_string($contents);
+        $MedicalTestApplication = simplexml_load_string($contents);
         $data = ((array) $medical_application_xml);
         return view('json.test')->with($data);
     }
@@ -522,7 +523,7 @@ class PatientController extends Controller {
 
             $medical_application->medical_date = $request->medical_date;
             $medical_application->date = date("Y-m-d H:i:s");
-            $medical_application->save();
+            // $medical_application->save();
             if ($medical != 4)
                 $contents = Storage::get("XN_chieucao-plaintext.xml");
             else
@@ -565,7 +566,7 @@ class PatientController extends Controller {
                 ])
                 ->get();
 
-        if (strlen($don_xet_nghiem) < 3) {
+        if (count($don_xet_nghiem) < 3) {
             return view('patient.testRegister');
         } else {
             if ($don_xet_nghiem[0]->Shift == 1)

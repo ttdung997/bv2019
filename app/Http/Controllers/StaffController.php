@@ -613,22 +613,24 @@ class StaffController extends Controller {
     }
 
     public function updateCOPDTestMedicalInfo(Request $request) {
+        $medical_id = $request->input('medicalID');
+        // die();
         $inputCertificate = $request->input('certificate');
         $pemCertificate = chunk_split($inputCertificate, 64, "\n");
         $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
-        $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumber'])->first();
+        $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumberHex'])->first();
         $staffId = Auth::id();
         $signature = $request->input('signatureValue');
         $signDatetime = $request->input('signDatetime');
 
         if(is_null($certificate))
-            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
+            return redirect()->route('medical_test_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
 
         if($certificate->status != 0)
-            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã bị thu hồi!', 'message_level' => 'danger']);
+            return redirect()->route('medical_test_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã bị thu hồi!', 'message_level' => 'danger']);
 
         if($certificate->user_id != $staffId)
-            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký không thuộc về nhân viên!', 'message_level' => 'danger']);
+            return redirect()->route('medical_test_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký không thuộc về nhân viên!', 'message_level' => 'danger']);
 
         $from = strtotime($certificate->valid_from_time);
         $to = strtotime($certificate->valid_to_time);
@@ -636,7 +638,6 @@ class StaffController extends Controller {
         if($from > $now || $to < $now)
             return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã hết hạn!', 'message_level' => 'danger']);
 
-        $medical_id = $request->input('medicalID');
         $medical = MedicalTestApplication::join('medical_test_type', 'medical_test_applications.xetnghiem', '=', 'medical_test_type.id')
                         ->where('medical_test_type.phongban', $request->input('room'))
                         ->where('medical_test_applications.id', $medical_id)->first();
@@ -701,7 +702,7 @@ class StaffController extends Controller {
                 $que = MedicalTestApplication::where('id', $medical_id)->where('status', '<>', MedicialManagement::COMPLETE_STATUS)->where('register_by', 2)->first();
                 if (!$que)
                     MedicalSpecialistApplication::where('patient_id', $medical->patient_id)->where('status', 2)->update(['status' => 3]);
-                //return redirect('staff/listCompeleteTestPatient');
+                return redirect('staff/listCompeleteTestPatient');
             }
         } else {
             //return redirect('staff/listWaitingTestPatient');
@@ -713,30 +714,39 @@ class StaffController extends Controller {
     public function medical_test_detail_as_json($id) {
         $medical = MedicalTestApplication::where('id', $id)->first();
 
+    $method = config('encrypt.method');
+        $global_key = base64_decode(config('encrypt.key'));
+        $iv = base64_decode(config('encrypt.iv'));
         try {
+
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-
-
-
+        $key = MedicalTestApplication::where('id', $id)->first()->xml_key;
+        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+          
         $medical_application_xml = simplexml_load_string($contents);
-        $data = ((array) $medical_application_xml);
-        return view('json.test')->with($data);
     }
 
     public function medical_COPD_test_detail_as_json($id) {
         $medical = MedicalTestApplication::where('id', $id)->first();
+        // die();
 
+       $method = config('encrypt.method');
+        $global_key = base64_decode(config('encrypt.key'));
+        $iv = base64_decode(config('encrypt.iv'));
         try {
+
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-
-
-
+        $key = MedicalTestApplication::where('id', $id)->first()->xml_key;
+        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+          
         $medical_application_xml = simplexml_load_string($contents);
         $data = ((array) $medical_application_xml);
         return view('json.COPD')->with($data);

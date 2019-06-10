@@ -48,12 +48,13 @@ if ($chucvu == 7) {
     </li>
     <script>
         function load() {
+                    // alert("123");
             $.ajax({
                 type: 'GET',
                 url: '/staff/getListNotice',
                 data: '_token = <?php echo csrf_token() ?>',
                 success: function (data) {
-                    //alert(data.Waiting);
+                    // alert(data.Waiting);
                     if (data.WaitTest !== 0) {
                         document.getElementById('WaitTest').innerHTML = "  " + data.WaitTest + "  ";
                         document.getElementById('WaitTest').style.display = "block";
@@ -117,4 +118,29 @@ if ($chucvu == 11) {
 
         </ul>
     </li>
+
 <?php } ?>
+
+<li class="dropdown">
+    <a ><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg> Chứng thư gốc</a>
+    <ul>
+        <li {{{ (Request::is('register-request-index') ? 'class=active' : '') }}}>
+            <a href="{{ route('register-request-index') }}"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg> Danh sách</a>
+        </li>
+        <li {{{ (Request::is('register-request-create') ? 'class=active' : '') }}}>
+            <a href="{{ route('register-request-create') }}"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg> cấp phát</a>
+        </li>
+    </ul>
+<li>
+
+<li class="dropdown">
+    <a ><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg> Giấy giới thiệu</a>
+    <ul>
+        <li {{{ (Request::is('intro-requests/index') ? 'class=active' : '') }}}>
+            <a href="{{ route('intro-requests-index') }}"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg> Danh sách</a>
+        </li>
+        <li {{{ (Request::is('intro-requests/create') ? 'class=active' : '') }}}>
+            <a href="{{ route('intro-requests-create') }}"><svg class="glyph stroked pencil"><use xlink:href="#stroked-pencil"></use></svg> Cấp phát</a>
+        </li>
+    </ul>
+<li>

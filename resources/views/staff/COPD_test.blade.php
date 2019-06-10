@@ -115,9 +115,9 @@ Phiếu đo dung phế
     <h2 class="col-md-offset-3">Kết quả Đo phế dung phổi</h2>
     <div id = "theluc" class="">
         <div class="form-group">
-        <input type="hidden" name="id" class="form-control" id="input_FVC" value="{{$benhnhan_id}}" >
-        <input type="hidden" name="name" class="form-control" id="input_FVC" value="{{$ten_benh_nhan}}" >
-        <input type="hidden" name="birthday" class="form-control" id="input_FVC" value="{{$ngay_sinh}}" >
+        <input type="hidden" name="id" class="form-control" id="123" value="{{$benhnhan_id}}" >
+        <input type="hidden" name="name" class="form-control" id="123" value="{{$ten_benh_nhan}}" >
+        <input type="hidden" name="birthday" class="form-control" id="123" value="{{$ngay_sinh}}" >
             <label for="input_FVC" class="col-md-2 control-label">FVC :</label>
             <div class="col-md-6">
                 <input type="text" name="FVC" class="form-control" id="input_FVC" value="{{$FVC}}" >

@@ -846,9 +846,10 @@ class DoctorController extends Controller {
         else
             $Shift = 2;
         $Wait1 = MedicalSpecialistApplication::where('status', 1)
-                        ->where('Shift', $Shift)->count();
+                       ->count();
         $Wait2 = MedicalSpecialistApplication::where('status', 3)
-                        ->where('Shift', $Shift)->count();
+                        ->count();
+        
 
         return response()->json(array('Wait1' => $Wait1, 'Wait2' => $Wait2), 200);
     }

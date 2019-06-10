@@ -267,7 +267,7 @@ Lịch sử xét nghiệm
             ].join('');
         }
         function checkMedicalTestApplication(id) {
-            $.get(baseUrl + '/checkMedicalTestApplication/' + id, function (data) {
+            $.get('/checkMedicalTestApplication/' + id, function (data) {
                 alert(data);
             });
         }
