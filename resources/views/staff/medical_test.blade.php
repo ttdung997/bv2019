@@ -142,7 +142,7 @@
             e.preventDefault();
 
             var originValue = '';
-            $('#medicalTestForm :input:not([type=hidden]):not([readonly])').each(function (index) {
+            $('#medicalTestForm :input:not([type=hidden)]:not([type=checkbox)]:not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
                 originValue += $(this).val();
             });
             originValue += {{ Auth::user()->id }};
@@ -173,7 +173,7 @@
                             $('#signatureValue').val(event.data.signature);
                             $('#signDatetime').val(time);
                             $('#certificate').val(event.data.certificate);
-                            $('#medicalTestForm :input:not([type=hidden]):not([readonly])').each(function (index) {
+                            $('#medicalTestForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
                                 $(this).prop("readonly", true);
                             });
                             $('#signBtn').prop("disabled", true);

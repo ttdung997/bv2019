@@ -1,37 +1,17 @@
 diff a/resources/views/patient/history_test.blade.php b/resources/views/patient/history_test.blade.php	(rejected hunks)
-@@ -78,6 +78,7 @@ Lịch sử xét nghiệm
-                     <th data-field="id"
-                         data-formatter="operateFormatter2"
-                         data-events="operateEvents">Xem chi tiết</th>
-+                    <th data-field="id" data-sortable="false" data-formatter="buttonCheckMedicalTestApplication">Kiểm tra</th>
-                 </tr>
-             </thead>
-         </table>
-@@ -184,6 +187,7 @@ Lịch sử xét nghiệm
+@@ -189,7 +189,6 @@ Lịch sử xét nghiệm
                  $table.bootstrapTable('refresh', {
                      url: '../../patient/detail.json/' + value
                  });
-+                $('#medical_test_application_id').attr("value", value);
+-                $('#medical_test_application_id').attr("value", value);
              },
              'click .like2': function (e, value, row) {
  
-@@ -253,6 +257,18 @@ Lịch sử xét nghiệm
-                 value.substring(0, 10)
-             ]
-         }
-+        function buttonCheckMedicalTestApplication(value, row, index) {
-+            return [
-+                '<button class="btn btn-default" onClick="checkMedicalTestApplication(',
-+                value,
-+                ')">Kiểm tra</button>'
-+            ].join('');
-+        }
-+        function checkMedicalTestApplication(id) {
-+            $.get(baseUrl + '/checkMedicalTestApplication/' + id, function (data) {
-+                alert(data);
-+            });
-+        }
-     </script>		
- 
-     @stop
-\ No newline at end of file
+@@ -197,6 +196,7 @@ Lịch sử xét nghiệm
+                 $testTable.bootstrapTable('refresh', {
+                     url: '../../patient/testDetail.json/' + value
+                 });
++                $('#medical_test_application_id').attr("value", value);
+             },
+             'click .remove': function (e, value, row) {
+                 document.getElementById('medical_id').setAttribute("value", value)

@@ -453,7 +453,7 @@ class PatientController extends Controller {
 
         $medical_application->xml_key = $ekey;
 
-        $medical_application->Shift = $Shift;
+        $medical_application->Shift = $request->Shift;
 
         $medical_application->medical_date = $request->medical_date;
         $medical_application->date = date("Y-m-d H:i:s");

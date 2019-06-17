@@ -1,88 +1,19 @@
 diff a/resources/views/staff/COPD_test.blade.php b/resources/views/staff/COPD_test.blade.php	(rejected hunks)
-@@ -69,7 +69,7 @@ Phiếu đo dung phế
-     @endif
- </div>
+@@ -204,7 +204,7 @@ Phiếu đo dung phế
+             e.preventDefault();
  
--<form class="form-horizontal" action="{{ route('update-COPD-test-medical-info') }}" enctype="multipart/form-data" method="post">
-+<form class="form-horizontal" action="{{ route('update-COPD-test-medical-info') }}" enctype="multipart/form-data" method="post" id="COPDForm">
-     <h2 class="col-md-offset-3"> Thông tin bệnh nhân</h2>
-     <div class="form-group">
-         <label class="col-md-2 control-label" style="font-size: 16px"> Họ tên  :</label>
-@@ -183,16 +183,76 @@ Phiếu đo dung phế
-     <div class="form-group">
-         <input type="hidden" name="medicalID" value="<?php echo($medical_id); ?>">
-         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-+        <input type="hidden" id="signatureValue" name="signatureValue">
-+		<input type="hidden" id="signDatetime" name="signDatetime">
-+		<input type="hidden" id="certificate" name="certificate">
-         <div class="col-md-offset-4">
-             <label>Hoàn thiện</label><input type="checkbox" value="1" name="checkSubmit" id="checkSubmit">
-             <!--<button type="button" onclick="getApi()" class="btn btn-success btn-lg">Bắt đầu đo kết quả</button>-->
--            <button type="submit" class="btn btn-primary btn-lg">Lưu kết quả </button>
-+            <button class="btn btn-primary btn-lg" id="signBtn">Ký số phiếu đo</button>
-+            <button class="btn btn-primary btn-lg" disabled id="saveBtn">Lưu kết quả </button>
- 
- 
-         </div>
-     </div>
- 
- </form>
-+<script>
-+    $(document).ready(function(){
-+
-+        $('#signBtn').on('click', function(e){
-+            e.preventDefault();
-+
-+            var originValue = '';
-+            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
-+                originValue += $(this).val();
-+            });
-+            originValue += {{ Auth::user()->id }};
-+            var currentdate = new Date();
-+            var time = currentdate.getHours() + ":"
-+                + currentdate.getMinutes() + ":"
-+                + currentdate.getSeconds()
-+                + ' '
-+                + currentdate.getDate() + "/"
-+                + (currentdate.getMonth()+1)  + "/"
-+                + currentdate.getFullYear();
-+			originValue += time;
-+			//console.log(originValue);
-+
-+            window.postMessage({
-+                type: "CREATE_SIGNATURE_REQUEST",
-+                originValue: originValue
-+            }, "*");
-+
-+            window.addEventListener("message", function (event) {
-+                if (event.source != window)
-+                    return;
-+
-+                if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
-+                    if (event.data.success) {
-+                        if (event.data.signature !== null) {
-+                            alert("Đã ký phiếu đo!");
-+                            $('#signatureValue').val(event.data.signature);
-+                            $('#signDatetime').val(time);
-+                            $('#certificate').val(event.data.certificate);
-+                            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
-+                                $(this).prop("readonly", true);
-+                            });
-+                            $('#signBtn').prop("disabled", true);
-+                            $('#saveBtn').prop("disabled", false);
-+                        } else {
-+                            alert("Chứng thư đã chọn không được dùng để ký!");
-+                        }
-+                    }
-+                    else {
-+                        alert("Ký số phiếu đo không thành công!");
-+                    }
-+                }
-+            })
-+        });
-+
-+    });
-+</script>
- <script>
- //    function load() {
- //        $.ajax({
+             var originValue = '';
+-            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++            $('#COPDForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                 originValue += $(this).val();
+             });
+             originValue += {{ Auth::user()->id }};
+@@ -235,7 +235,7 @@ Phiếu đo dung phế
+                             $('#signatureValue').val(event.data.signature);
+                             $('#signDatetime').val(time);
+                             $('#certificate').val(event.data.certificate);
+-                            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++                            $('#COPDForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                                 $(this).prop("readonly", true);
+                             });
+                             $('#signBtn').prop("disabled", true);

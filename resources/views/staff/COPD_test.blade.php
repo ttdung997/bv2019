@@ -204,7 +204,7 @@ Phiếu đo dung phế
             e.preventDefault();
 
             var originValue = '';
-            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
+            $('#COPDForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
                 originValue += $(this).val();
             });
             originValue += {{ Auth::user()->id }};
@@ -235,7 +235,7 @@ Phiếu đo dung phế
                             $('#signatureValue').val(event.data.signature);
                             $('#signDatetime').val(time);
                             $('#certificate').val(event.data.certificate);
-                            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
+                           $('#COPDForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
                                 $(this).prop("readonly", true);
                             });
                             $('#signBtn').prop("disabled", true);

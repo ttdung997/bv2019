@@ -1,4 +1,67 @@
-diff a/app/Http/Controllers/HomeController.php b/app/Http/Controllers/HomeController.php	(rejected hunks)
+From e6ff29e1b18b4db6393d98a941c65d133cf17c3d Mon Sep 17 00:00:00 2001
+From: "Jack Reacher (JR94)" <jackreacher1994@gmail.com>
+Date: Mon, 10 Jun 2019 20:59:02 +0700
+Subject: [PATCH] Fix check signature
+
+---
+ app/Http/Controllers/DoctorController.php     |  12 +--
+ app/Http/Controllers/HomeController.php       | 101 +++++++-----------
+ resources/views/doctor/medical_exam.blade.php |   6 +-
+ .../views/patient/history_test.blade.php      |   2 +-
+ resources/views/staff/COPD_test.blade.php     |   4 +-
+ resources/views/staff/medical_test.blade.php  |   4 +-
+ routes/web.php                                |   1 -
+ 7 files changed, 50 insertions(+), 80 deletions(-)
+
+diff --git a/app/Http/Controllers/DoctorController.php b/app/Http/Controllers/DoctorController.php
+index bb76961..fd72b48 100755
+--- a/app/Http/Controllers/DoctorController.php
++++ b/app/Http/Controllers/DoctorController.php
+@@ -388,8 +388,7 @@ class DoctorController extends Controller {
+             $inputCertificate = $request->input('certificate');
+             $pemCertificate = chunk_split($inputCertificate, 64, "\n");
+             $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
+-            // print_r(openssl_x509_parse($pemCertificate)['serialNumberHex']);
+-            // die();
++            
+             $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumberHex'])->first();
+             $doctorId = Auth::id();
+             $signature = $request->input('signatureValue');
+@@ -416,11 +415,7 @@ class DoctorController extends Controller {
+             $global_key = base64_decode(config('encrypt.key'));
+             $iv = base64_decode(config('encrypt.iv'));
+ 
+-
+-
+-
+             try {
+-
+                 $contents = Storage::get($medical->url);
+             } catch (\Exception $e) {
+                 return "Không tìm thấy file đơn khám";
+@@ -546,9 +541,6 @@ class DoctorController extends Controller {
+                 $medical_application_xml->kham_lam_sang->da_lieu->bac_si_ky = $doctorId;
+                 $medical_application_xml->kham_lam_sang->da_lieu->thoi_diem_ky = $signDatetime;
+                 $medical_application_xml->kham_lam_sang->da_lieu->chung_thu_ky = $certificate->id;
+-
+-
+-;
+             }
+ 
+             if ($oauth->checkPermission(Permission::CLS_PERMISSION)) {
+@@ -593,8 +585,6 @@ class DoctorController extends Controller {
+             $resource = $medical_application_xml->asXML();
+             $resource = openssl_encrypt($resource, $method, $key, OPENSSL_RAW_DATA, $iv);
+ 
+-        
+-
+             // $resource = $medical_application_xml->asXML();
+             
+             Storage::put($medical->url, $resource);
+diff --git a/app/Http/Controllers/HomeController.php b/app/Http/Controllers/HomeController.php
+index 4be07e1..d810bc1 100755
+--- a/app/Http/Controllers/HomeController.php
++++ b/app/Http/Controllers/HomeController.php
 @@ -66,21 +66,21 @@ class HomeController extends Controller
      }
  
@@ -169,3 +232,113 @@ diff a/app/Http/Controllers/HomeController.php b/app/Http/Controllers/HomeContro
 +        return 'Phiếu xét nghiệm hợp lệ!';
      }
  }
+diff --git a/resources/views/doctor/medical_exam.blade.php b/resources/views/doctor/medical_exam.blade.php
+index 1076867..01d9540 100755
+--- a/resources/views/doctor/medical_exam.blade.php
++++ b/resources/views/doctor/medical_exam.blade.php
+@@ -359,7 +359,7 @@
+             e.preventDefault();
+ 
+             var originValue = '';
+-            $('#medicalExamForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++            $('#medicalExamForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                 originValue += $(this).val();
+             });
+             originValue += {{ Auth::user()->id }};
+@@ -372,7 +372,7 @@
+                 + (currentdate.getMonth()+1)  + "/"
+                 + currentdate.getFullYear();
+ 			originValue += time;
+-			//console.log(originValue);
++			console.log(originValue);
+ 
+             window.postMessage({
+                 type: "CREATE_SIGNATURE_REQUEST",
+@@ -390,7 +390,7 @@
+                             $('#signatureValue').val(event.data.signature);
+                             $('#signDatetime').val(time);
+                             $('#certificate').val(event.data.certificate);
+-                            $('#medicalExamForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++                            $('#medicalExamForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                                 $(this).prop("readonly", true);
+                             });
+                             $('#signBtn').prop("disabled", true);
+diff --git a/resources/views/patient/history_test.blade.php b/resources/views/patient/history_test.blade.php
+index f9d19db..dc80be3 100755
+--- a/resources/views/patient/history_test.blade.php
++++ b/resources/views/patient/history_test.blade.php
+@@ -189,7 +189,6 @@ Lịch sử xét nghiệm
+                 $table.bootstrapTable('refresh', {
+                     url: '../../patient/detail.json/' + value
+                 });
+-                $('#medical_test_application_id').attr("value", value);
+             },
+             'click .like2': function (e, value, row) {
+ 
+@@ -197,6 +196,7 @@ Lịch sử xét nghiệm
+                 $testTable.bootstrapTable('refresh', {
+                     url: '../../patient/testDetail.json/' + value
+                 });
++                $('#medical_test_application_id').attr("value", value);
+             },
+             'click .remove': function (e, value, row) {
+                 document.getElementById('medical_id').setAttribute("value", value)
+diff --git a/resources/views/staff/COPD_test.blade.php b/resources/views/staff/COPD_test.blade.php
+index 40b97a9..55c0c75 100755
+--- a/resources/views/staff/COPD_test.blade.php
++++ b/resources/views/staff/COPD_test.blade.php
+@@ -204,7 +204,7 @@ Phiếu đo dung phế
+             e.preventDefault();
+ 
+             var originValue = '';
+-            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++            $('#COPDForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                 originValue += $(this).val();
+             });
+             originValue += {{ Auth::user()->id }};
+@@ -235,7 +235,7 @@ Phiếu đo dung phế
+                             $('#signatureValue').val(event.data.signature);
+                             $('#signDatetime').val(time);
+                             $('#certificate').val(event.data.certificate);
+-                            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++                            $('#COPDForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                                 $(this).prop("readonly", true);
+                             });
+                             $('#signBtn').prop("disabled", true);
+diff --git a/resources/views/staff/medical_test.blade.php b/resources/views/staff/medical_test.blade.php
+index fd8921a..0c5b1e9 100755
+--- a/resources/views/staff/medical_test.blade.php
++++ b/resources/views/staff/medical_test.blade.php
+@@ -142,7 +142,7 @@
+             e.preventDefault();
+ 
+             var originValue = '';
+-            $('#medicalTestForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++            $('#medicalTestForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                 originValue += $(this).val();
+             });
+             originValue += {{ Auth::user()->id }};
+@@ -173,7 +173,7 @@
+                             $('#signatureValue').val(event.data.signature);
+                             $('#signDatetime').val(time);
+                             $('#certificate').val(event.data.certificate);
+-                            $('#medicalTestForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++                            $('#medicalTestForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                                 $(this).prop("readonly", true);
+                             });
+                             $('#signBtn').prop("disabled", true);
+diff --git a/routes/web.php b/routes/web.php
+index 9feeef0..b5cfeff 100755
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -375,7 +375,6 @@ Route::post('remove-medical-application', 'PatientController@removeMedical');
+ 
+ Route::group(['middleware' => 'auth'], function() {
+         Route::get('checkMedicalApplication/{id}','HomeController@checkMedicalApplication');
+-        Route::get('checkCOPDApplication/{id}','HomeController@checkCOPDApplication');
+         Route::get('checkMedicalTestApplication/{id}','HomeController@checkMedicalTestApplication');
+ });
+ 
+-- 
+2.19.0.windows.1
+

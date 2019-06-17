@@ -1,83 +1,28 @@
 diff a/resources/views/doctor/medical_exam.blade.php b/resources/views/doctor/medical_exam.blade.php	(rejected hunks)
-@@ -67,7 +67,7 @@
-     @endif
- </div>
+@@ -359,7 +359,7 @@
+             e.preventDefault();
  
--<form class="form-horizontal" action="{{ route('update-medical-info') }}" enctype="multipart/form-data" method="post">
-+<form class="form-horizontal" action="{{ route('update-medical-info') }}" enctype="multipart/form-data" method="post" id="medicalExamForm">
- <h2 class="col-md-offset-3"> Thông tin bệnh nhân</h2>
-     <div class="form-group">
-         <label class="col-md-2 control-label" style="font-size: 16px"> Họ tên  :</label>
-@@ -342,11 +342,70 @@
-         <div class="form-group">
-         <input type="hidden" name="medicalID" value="<?php echo($medical_id); ?>">
-         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-+		<input type="hidden" id="signatureValue" name="signatureValue">
-+		<input type="hidden" id="signDatetime" name="signDatetime">
-+		<input type="hidden" id="certificate" name="certificate">
-         	<div class="col-md-offset-4">
--        		<button type="submit" class="btn btn-primary btn-lg">Lưu kết quả </button>
-+				<button class="btn btn-primary btn-lg" id="signBtn">Ký số đơn khám</button>
-+        		<button class="btn btn-primary btn-lg" disabled id="saveBtn">Lưu kết quả </button>
-         	</div>
-         </div>
-       
-     </form>
-+<script>
-+    $(document).ready(function(){
+             var originValue = '';
+-            $('#medicalExamForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++            $('#medicalExamForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                 originValue += $(this).val();
+             });
+             originValue += {{ Auth::user()->id }};
+@@ -372,7 +372,7 @@
+                 + (currentdate.getMonth()+1)  + "/"
+                 + currentdate.getFullYear();
+ 			originValue += time;
+-			//console.log(originValue);
++			console.log(originValue);
  
-+        $('#signBtn').on('click', function(e){
-+            e.preventDefault();
-+
-+            var originValue = '';
-+            $('#medicalExamForm :input:not([type=hidden]):not([readonly])').each(function (index) {
-+                originValue += $(this).val();
-+            });
-+            originValue += {{ Auth::user()->id }};
-+            var currentdate = new Date();
-+            var time = currentdate.getHours() + ":"
-+                + currentdate.getMinutes() + ":"
-+                + currentdate.getSeconds()
-+                + ' '
-+                + currentdate.getDate() + "/"
-+                + (currentdate.getMonth()+1)  + "/"
-+                + currentdate.getFullYear();
-+			originValue += time;
-+			//console.log(originValue);
-+
-+            window.postMessage({
-+                type: "CREATE_SIGNATURE_REQUEST",
-+                originValue: originValue
-+            }, "*");
-+
-+            window.addEventListener("message", function (event) {
-+                if (event.source != window)
-+                    return;
-+
-+                if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
-+                    if (event.data.success) {
-+                        if (event.data.signature !== null) {
-+                            alert("Đã ký đơn khám!");
-+                            $('#signatureValue').val(event.data.signature);
-+                            $('#signDatetime').val(time);
-+                            $('#certificate').val(event.data.certificate);
-+                            $('#medicalExamForm :input:not([type=hidden]):not([readonly])').each(function (index) {
-+                                $(this).prop("readonly", true);
-+                            });
-+                            $('#signBtn').prop("disabled", true);
-+                            $('#saveBtn').prop("disabled", false);
-+                        } else {
-+                            alert("Chứng thư đã chọn không được dùng để ký!");
-+                        }
-+                    }
-+                    else {
-+                        alert("Ký số đơn khám không thành công!");
-+                    }
-+                }
-+            })
-+        });
-+
-+    });
-+</script>
- @stop
-\ No newline at end of file
+             window.postMessage({
+                 type: "CREATE_SIGNATURE_REQUEST",
+@@ -390,7 +390,7 @@
+                             $('#signatureValue').val(event.data.signature);
+                             $('#signDatetime').val(time);
+                             $('#certificate').val(event.data.certificate);
+-                            $('#medicalExamForm :input:not([type=hidden]):not([readonly])').each(function (index) {
++                            $('#medicalExamForm :input:not([type=hidden]):not([readonly]):not([disabled])').each(function (index) {
+                                 $(this).prop("readonly", true);
+                             });
+                             $('#signBtn').prop("disabled", true);

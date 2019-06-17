@@ -189,7 +189,6 @@ Lịch sử xét nghiệm
                 $table.bootstrapTable('refresh', {
                     url: '../../patient/detail.json/' + value
                 });
-                $('#medical_test_application_id').attr("value", value);
             },
             'click .like2': function (e, value, row) {
 
@@ -197,6 +196,7 @@ Lịch sử xét nghiệm
                 $testTable.bootstrapTable('refresh', {
                     url: '../../patient/testDetail.json/' + value
                 });
+                $('#medical_test_application_id').attr("value", value);
             },
             'click .remove': function (e, value, row) {
                 document.getElementById('medical_id').setAttribute("value", value)

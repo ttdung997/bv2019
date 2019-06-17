@@ -164,7 +164,7 @@ class OAuthorization
 	*
 	*/
 	public function checkPermission($permission_id){
-        if((!$this->isExpire())&&in_array($permission_id, $this->getPermission())){
+        if((in_array($permission_id, $this->getPermission()))){
         	return true;
         }else{
         	return false;

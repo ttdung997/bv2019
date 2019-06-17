@@ -1,4 +1,4 @@
-@extends('doctor.layout')
+@extends('doctor.cert.layout')
 @section('title')
  Xin giấy giới thiệu
 @stop

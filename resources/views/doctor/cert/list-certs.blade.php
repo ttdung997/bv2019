@@ -1,4 +1,4 @@
-@extends('doctor.layout')
+@extends('doctor.cert.layout')
 @section('title')
    Danh sách chứng thư gốc
 @stop

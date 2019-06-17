@@ -66,21 +66,21 @@ class HomeController extends Controller
     }
 
     public function checkSignature($message, $signature, $certificate) {
-
         $publicKey = openssl_pkey_get_details(openssl_pkey_get_public($certificate->certificate))['key'];
-        // return openssl_verify($message, base64_decode($signature), $publicKey);
-        return 1;
+        return openssl_verify($message, base64_decode($signature), $publicKey);
     }
 
     public function checkMedicalApplication($id) {
         $medical = MedicalApplication::findOrFail($id);
+
+        if($medical->status != 0)
+            return 'Trạng thái của đơn khám chưa hoàn thành!';
 
         $method = config('encrypt.method');
         $global_key = base64_decode(config('encrypt.key'));
         $iv = base64_decode(config('encrypt.iv'));
 
         try {
-
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
@@ -95,7 +95,6 @@ class HomeController extends Controller
         if(!empty($kham_the_luc->chu_ky)) {
             $originValue = $kham_the_luc->chieu_cao . $kham_the_luc->can_nang . $kham_the_luc->huyet_ap . $kham_the_luc->bac_si_ky . $kham_the_luc->thoi_diem_ky;
             
-
             $certificate = Certificate::findOrFail($kham_the_luc->chung_thu_ky);
 
             if($this->checkCertNotBelongToUser($kham_the_luc->bac_si_ky, $kham_the_luc->chung_thu_ky))
@@ -110,15 +109,14 @@ class HomeController extends Controller
             if(! $this->checkSignature($originValue, $kham_the_luc->chu_ky, $certificate))
                 return 'Đơn khám đã bị sửa đổi trái phép!';
         }
-        // print_r($kham_the_luc);
-            // die();
+
         $kham_lam_sang_noi_khoa = $medical_application_xml->kham_lam_sang->noi_khoa;
         if(!empty($kham_lam_sang_noi_khoa->chu_ky)) {
             $originValue = $kham_lam_sang_noi_khoa->tuan_hoan . $kham_lam_sang_noi_khoa->phan_loai_tuan_hoan . $kham_lam_sang_noi_khoa->tieu_hoa . $kham_lam_sang_noi_khoa->phan_loai_tieu_hoa . $kham_lam_sang_noi_khoa->ho_hap . $kham_lam_sang_noi_khoa->phan_loai_ho_hap . $kham_lam_sang_noi_khoa->noi_tiet . $kham_lam_sang_noi_khoa->phan_loai_noi_tiet . $kham_lam_sang_noi_khoa->than_tiet_nieu . $kham_lam_sang_noi_khoa->phan_loai_than_tiet_nieu . $kham_lam_sang_noi_khoa->co_xuong_khop . $kham_lam_sang_noi_khoa->phan_loai_co_xuong_khop . $kham_lam_sang_noi_khoa->than_kinh . $kham_lam_sang_noi_khoa->phan_loai_than_kinh . $kham_lam_sang_noi_khoa->tam_than . $kham_lam_sang_noi_khoa->phan_loai_tam_than . $kham_lam_sang_noi_khoa->bac_si_ky . $kham_lam_sang_noi_khoa->thoi_diem_ky;
             $certificate = Certificate::findOrFail($kham_lam_sang_noi_khoa->chung_thu_ky);
 
             if($this->checkCertNotBelongToUser($kham_lam_sang_noi_khoa->bac_si_ky, $kham_lam_sang_noi_khoa->chung_thu_ky))
-                return 'Chứng thư số dùng để ký có ID '.$kham_lam_sang_noi_khoa->chung_thu_ky.' không thuộc về bác sĩ '.User::findOrFail($kham_the_luc->bac_si_ky)->name.'!';
+                return 'Chứng thư số dùng để ký có ID '.$kham_lam_sang_noi_khoa->chung_thu_ky.' không thuộc về bác sĩ '.User::findOrFail($kham_lam_sang_noi_khoa->bac_si_ky)->name.'!';
 
             if($certificate->status != 0)
                 return 'Chứng thư số dùng để ký có ID '.$kham_lam_sang_noi_khoa->chung_thu_ky.' đã bị thu hồi!';
@@ -241,57 +239,20 @@ class HomeController extends Controller
         return 'Đơn khám hợp lệ!';
     }
 
-    public function checkCOPDApplication($id) {
+    public function checkMedicalTestApplication($id) {
         $medical = MedicalTestApplication::findOrFail($id);
 
+        if($medical->status != 0)
+            return 'Trạng thái của xét nghiệm chưa hoàn thành!';
+        
         $method = config('encrypt.method');
         $global_key = base64_decode(config('encrypt.key'));
         $iv = base64_decode(config('encrypt.iv'));
 
         try {
-
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
-            return "Không tìm thấy file đơn khám";
-        }
-        $key = MedicalApplication::where('id', $id)->first()->xml_key;
-        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
-        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
-          
-        $medical_application_xml = simplexml_load_string($contents);
-
-        $phe_dung = $medical_application_xml->phe_dung;
-        if(!empty($phe_dung->chu_ky)) {
-            $originValue = $phe_dung->FVC . $phe_dung->FEV1 . $phe_dung->PEF . $phe_dung->nhan_vien_ky . $phe_dung->thoi_diem_ky;
-            $certificate = Certificate::findOrFail($phe_dung->chung_thu_ky);
-
-            if($this->checkCertNotBelongToUser($phe_dung->nhan_vien_ky, $phe_dung->chung_thu_ky))
-                return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' không thuộc về nhân viên '.User::findOrFail($phe_dung->nhan_vien_ky)->name.'!';
-
-            if($certificate->status != 0)
-                return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' đã bị thu hồi!';
-
-            if($this->checkCertificateExpired($certificate))
-                return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' đã hết hạn!';
-
-            if(! $this->checkSignature($originValue, $phe_dung->chu_ky, $certificate))
-                return 'Phiếu đo đã bị sửa đổi trái phép!';
-        }
-
-        return 'Phiếu đo hợp lệ!';
-    }
-
-    public function checkMedicalTestApplication($id) {
-        $medical = MedicalTestApplication::findOrFail($id);
-         $method = config('encrypt.method');
-        $global_key = base64_decode(config('encrypt.key'));
-        $iv = base64_decode(config('encrypt.iv'));
-
-        try {
-
-            $contents = Storage::get($medical->url);
-        } catch (\Exception $e) {
-            return "Không tìm thấy file đơn khám";
+            return "Không tìm thấy file xét nghiệm";
         }
         $key = MedicalTestApplication::where('id', $id)->first()->xml_key;
         $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
@@ -299,24 +260,44 @@ class HomeController extends Controller
           
         $medical_application_xml = simplexml_load_string($contents);
 
-        $kham_the_luc = $medical_application_xml->kham_the_luc;
-        if(!empty($kham_the_luc->chu_ky)) {
-            $originValue = $kham_the_luc->chieu_cao . $kham_the_luc->can_nang . $kham_the_luc->huyet_ap . $kham_the_luc->nhan_vien_ky . $kham_the_luc->thoi_diem_ky;
-            $certificate = Certificate::findOrFail($kham_the_luc->chung_thu_ky);
+        if($medical->xetnghiem != 4) {
+            $kham_the_luc = $medical_application_xml->kham_the_luc;
+            if(!empty($kham_the_luc->chu_ky)) {
+                $originValue = $kham_the_luc->chieu_cao . $kham_the_luc->can_nang . $kham_the_luc->huyet_ap . $kham_the_luc->nhan_vien_ky . $kham_the_luc->thoi_diem_ky;
+                $certificate = Certificate::findOrFail($kham_the_luc->chung_thu_ky);
 
-            if($this->checkCertNotBelongToUser($kham_the_luc->nhan_vien_ky, $kham_the_luc->chung_thu_ky))
-                return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' không thuộc về nhân viên '.User::findOrFail($kham_the_luc->nhan_vien_ky)->name.'!';
+                if($this->checkCertNotBelongToUser($kham_the_luc->nhan_vien_ky, $kham_the_luc->chung_thu_ky))
+                    return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' không thuộc về nhân viên '.User::findOrFail($kham_the_luc->nhan_vien_ky)->name.'!';
 
-            if($certificate->status != 0)
-                return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' đã bị thu hồi!';
+                if($certificate->status != 0)
+                    return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' đã bị thu hồi!';
 
-            if($this->checkCertificateExpired($certificate))
-                return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' đã hết hạn!';
+                if($this->checkCertificateExpired($certificate))
+                    return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' đã hết hạn!';
 
-            if(! $this->checkSignature($originValue, $kham_the_luc->chu_ky, $certificate))
-                return 'Đơn khám đo đã bị sửa đổi trái phép!';
+                if(! $this->checkSignature($originValue, $kham_the_luc->chu_ky, $certificate))
+                    return 'Phiếu xét nghiệm đã bị sửa đổi trái phép!';
+            }
+        } else {
+            $phe_dung = $medical_application_xml->phe_dung;
+            if(!empty($phe_dung->chu_ky)) {
+                $originValue = $phe_dung->FVC . $phe_dung->FEV1 . $phe_dung->PEF . $phe_dung->nhan_vien_ky . $phe_dung->thoi_diem_ky;
+                $certificate = Certificate::findOrFail($phe_dung->chung_thu_ky);
+
+                if($this->checkCertNotBelongToUser($phe_dung->nhan_vien_ky, $phe_dung->chung_thu_ky))
+                    return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' không thuộc về nhân viên '.User::findOrFail($phe_dung->nhan_vien_ky)->name.'!';
+
+                if($certificate->status != 0)
+                    return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' đã bị thu hồi!';
+
+                if($this->checkCertificateExpired($certificate))
+                    return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' đã hết hạn!';
+
+                if(! $this->checkSignature($originValue, $phe_dung->chu_ky, $certificate))
+                    return 'Phiếu xét nghiệm đã bị sửa đổi trái phép!';
+            }
         }
 
-        return 'Đơn khám hợp lệ!';
+        return 'Phiếu xét nghiệm hợp lệ!';
     }
 }

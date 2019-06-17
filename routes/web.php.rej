@@ -1,14 +1,9 @@
 diff a/routes/web.php b/routes/web.php	(rejected hunks)
-@@ -373,6 +373,12 @@ Route::group(['prefix' => 'doctor', 'middleware' => 'web'], function () {
+@@ -375,7 +375,6 @@ Route::post('remove-medical-application', 'PatientController@removeMedical');
  
- Route::post('remove-medical-application', 'PatientController@removeMedical');
- 
-+Route::group(['middleware' => 'auth'], function() {
-+        Route::get('checkMedicalApplication/{id}','HomeController@checkMedicalApplication');
-+        Route::get('checkCOPDApplication/{id}','HomeController@checkCOPDApplication');
-+        Route::get('checkMedicalTestApplication/{id}','HomeController@checkMedicalTestApplication');
-+});
-+
- Route::post('share', 'OAuthController@postShare')->name('oauth-share');
- 
+ Route::group(['middleware' => 'auth'], function() {
+         Route::get('checkMedicalApplication/{id}','HomeController@checkMedicalApplication');
+-        Route::get('checkCOPDApplication/{id}','HomeController@checkCOPDApplication');
+         Route::get('checkMedicalTestApplication/{id}','HomeController@checkMedicalTestApplication');
+ });
  

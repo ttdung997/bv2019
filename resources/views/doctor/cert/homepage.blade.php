@@ -1,4 +1,6 @@
-@extends('doctor.layout')
+@extends('doctor.cert.layout')
+
+
 @section('title')
    Quản lý chứng thư
 @stop

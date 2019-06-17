@@ -388,8 +388,7 @@ class DoctorController extends Controller {
             $inputCertificate = $request->input('certificate');
             $pemCertificate = chunk_split($inputCertificate, 64, "\n");
             $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
-            // print_r(openssl_x509_parse($pemCertificate)['serialNumberHex']);
-            // die();
+            
             $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumberHex'])->first();
             $doctorId = Auth::id();
             $signature = $request->input('signatureValue');
@@ -416,11 +415,7 @@ class DoctorController extends Controller {
             $global_key = base64_decode(config('encrypt.key'));
             $iv = base64_decode(config('encrypt.iv'));
 
-
-
-
             try {
-
                 $contents = Storage::get($medical->url);
             } catch (\Exception $e) {
                 return "Không tìm thấy file đơn khám";
@@ -546,9 +541,6 @@ class DoctorController extends Controller {
                 $medical_application_xml->kham_lam_sang->da_lieu->bac_si_ky = $doctorId;
                 $medical_application_xml->kham_lam_sang->da_lieu->thoi_diem_ky = $signDatetime;
                 $medical_application_xml->kham_lam_sang->da_lieu->chung_thu_ky = $certificate->id;
-
-
-;
             }
 
             if ($oauth->checkPermission(Permission::CLS_PERMISSION)) {
@@ -592,8 +584,6 @@ class DoctorController extends Controller {
 
             $resource = $medical_application_xml->asXML();
             $resource = openssl_encrypt($resource, $method, $key, OPENSSL_RAW_DATA, $iv);
-
-        
 
             // $resource = $medical_application_xml->asXML();
             
