@@ -27,6 +27,15 @@
         Chào mừng
     </a>
 </li>
+<?php 
+    if(!Request::is('staff/index')){
+        if(!isset($_COOKIE['cert'])) {
+            header('Location: /staff');
+            die();
+        }
+    }
+?>
+
 <?php
 $chucvu = DB::table('staffs')->where('staff_id', Auth::user()->id)->first()->chucvu;
 //kiểm tra xem có phải kĩ sư y tế

@@ -229,17 +229,23 @@ Phiếu đo dung phế
                     return;
 
                 if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
+                    // console.log(event);
+                    // console.log(event.data.enhancedKeyUsage);
                     if (event.data.success) {
                         if (event.data.signature !== null) {
-                            alert("Đã ký phiếu đo!");
-                            $('#signatureValue').val(event.data.signature);
-                            $('#signDatetime').val(time);
-                            $('#certificate').val(event.data.certificate);
-                           $('#COPDForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
-                                $(this).prop("readonly", true);
-                            });
-                            $('#signBtn').prop("disabled", true);
-                            $('#saveBtn').prop("disabled", false);
+                            if(event.data.enhancedKeyUsage == 3){
+                                alert("Đã ký phiếu đo!");
+                                $('#signatureValue').val(event.data.signature);
+                                $('#signDatetime').val(time);
+                                $('#certificate').val(event.data.certificate);
+                               $('#COPDForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
+                                    $(this).prop("readonly", true);
+                                });
+                                $('#signBtn').prop("disabled", true);
+                                $('#saveBtn').prop("disabled", false);
+                            }else{
+                                alert("Chứng thư đã chọn không phù hợp cho tài liệu này");
+                            }
                         } else {
                             alert("Chứng thư đã chọn không được dùng để ký!");
                         }

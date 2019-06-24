@@ -56,7 +56,19 @@ class DoctorController extends Controller {
     }
 
     public function index() {
-        return view('doctor.index');
+        $checkCert = 0;
+        // print(Auth::user()->id);
+        // die();
+        $cert = DB::table("certificates")->where('user_id',Auth::user()->id)->get();
+        $crequest = DB::table("crequests")->where('user_id',Auth::user()->id)->get();
+        // print_r(count($cert));
+        if(!(count($cert)> 0)){
+            if(!(count($crequest) > 0)) {
+                   $checkCert = 2;
+                }
+           $checkCert = 1;
+        } 
+        return view('doctor.index',['checkCert' => $checkCert]);
     }
 
     public function info() {

@@ -7,7 +7,6 @@
         <p>Chào mừng bạn đến với hệ thống đăng ký khám chữa bệnh.
         Để tiếp tục vui lòng ấn vào <a href="/home">đây</a>.
         </p>
-
     </div>
 
 @endsection

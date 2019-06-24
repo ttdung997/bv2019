@@ -26,7 +26,16 @@ Danh sách chờ khám
 		</div>
  <script>
 	var $table = $('#table-detail');
-
+    $.ajax({
+        type: 'GET',
+        url: 'getInfoPatient/' + i,
+        data: '_token = <?php echo csrf_token() ?>',
+        success: function (data) {
+            $("#so_bo").html(data.so_bo);
+            $("#xet_nghiem").html(data.xet_nghiem);
+            $("#chan_doan").html(data.chan_doan);
+        }
+    });
 
     //hàm khi click Kham
     function operateFormatter(value, row, index) {

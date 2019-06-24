@@ -17,6 +17,14 @@
         display: none;
     }
 </style>
+<?php 
+    if(!Request::is('doctor/index')){
+        if(!isset($_COOKIE['cert'])) {
+            header('Location: /doctor');
+            die();
+        }
+    }
+?>
 
 <li {{{ (Request::is('doctor/index') ? 'class=active' : '') }}}>
     <a href="{{ route('doctor-index') }}">

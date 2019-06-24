@@ -386,15 +386,19 @@
                 if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
                     if (event.data.success) {
                         if (event.data.signature !== null) {
-                            alert("Đã ký đơn khám!");
-                            $('#signatureValue').val(event.data.signature);
-                            $('#signDatetime').val(time);
-                            $('#certificate').val(event.data.certificate);
-                            $('#medicalExamForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
-                                $(this).prop("readonly", true);
-                            });
-                            $('#signBtn').prop("disabled", true);
-                            $('#saveBtn').prop("disabled", false);
+                            if(event.data.enhancedKeyUsage == 2){
+                                alert("Đã ký đơn khám!");
+                                $('#signatureValue').val(event.data.signature);
+                                $('#signDatetime').val(time);
+                                $('#certificate').val(event.data.certificate);
+                                $('#medicalExamForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
+                                    $(this).prop("readonly", true);
+                                });
+                                $('#signBtn').prop("disabled", true);
+                                $('#saveBtn').prop("disabled", false);
+                            }else{
+                                alert("Chứng thư đã chọn không phù hợp cho tài liệu này");
+                            }
                         } else {
                             alert("Chứng thư đã chọn không được dùng để ký!");
                         }

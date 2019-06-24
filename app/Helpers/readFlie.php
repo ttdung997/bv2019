@@ -9,7 +9,8 @@ function readXml() {
      */
 
     $roles=simplexml_load_file('extendedkeyusage.xml') or die('Error: Không thể đọc file');
-
+    // print_r($roles);
+    // die();
     return $roles;
 }
 

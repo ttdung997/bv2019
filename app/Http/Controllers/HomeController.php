@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\RBACController\UserManagement;
+use Illuminate\Support\Facades\DB;
 use Giaptt\Oidcda\Authen;
 use App\Http\Requests;
 use App\Model\MedicalApplication;
@@ -12,6 +13,7 @@ use App\Model\MedicalTestApplication;
 use App\User;
 use App\Model\Certificate;
 use Storage;
+
 
 class HomeController extends Controller
 {
@@ -66,10 +68,24 @@ class HomeController extends Controller
     }
 
     public function checkSignature($message, $signature, $certificate) {
+        // print_r($publicKey = (openssl_pkey_get_public($certificate->certificate)));
         $publicKey = openssl_pkey_get_details(openssl_pkey_get_public($certificate->certificate))['key'];
         return openssl_verify($message, base64_decode($signature), $publicKey);
     }
+    public function checkUserCert(Request $rq){
+        $cert = DB::table("certificates")->where('user_id',Auth::user()->id)->first();
 
+         // print_r($rq->sign."123");
+         if($this->checkSignature("123456", $rq->sign, $cert)){
+            $cookie_name = "cert";
+            $cookie_value = $rq->sign;
+            setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1 day
+            return response()->json(array('flag' => 0), 200);
+ 
+         }
+            return response()->json(array('flag' => 1), 200);
+ 
+    }
     public function checkMedicalApplication($id) {
         $medical = MedicalApplication::findOrFail($id);
 

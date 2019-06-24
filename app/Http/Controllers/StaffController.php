@@ -49,7 +49,19 @@ class StaffController extends Controller {
 
     public function index() {
         $key = Keygen::bytes(256)->generate();
-        return view('staff.index');
+        $checkCert = 0;
+        // print(Auth::user()->id);
+        // die();
+        $cert = DB::table("certificates")->where('user_id',Auth::user()->id)->get();
+        $crequest = DB::table("crequests")->where('user_id',Auth::user()->id)->get();
+        // print_r(count($cert));
+        if(!(count($cert)> 0)){
+           $checkCert = 1;
+            if(!(count($crequest) > 0)) {
+                   $checkCert = 2;
+                }
+        } 
+        return view('staff.index',['checkCert' => $checkCert]);
     }
 
     /**
