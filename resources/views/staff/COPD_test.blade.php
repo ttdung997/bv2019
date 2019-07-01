@@ -184,8 +184,8 @@ Phiếu đo dung phế
         <input type="hidden" name="medicalID" value="<?php echo($medical_id); ?>">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" id="signatureValue" name="signatureValue">
-		<input type="hidden" id="signDatetime" name="signDatetime">
-		<input type="hidden" id="certificate" name="certificate">
+        <input type="hidden" id="signDatetime" name="signDatetime">
+        <input type="hidden" id="certificate" name="certificate">
         <div class="col-md-offset-4">
             <label>Hoàn thiện</label><input type="checkbox" value="1" name="checkSubmit" id="checkSubmit">
             <!--<button type="button" onclick="getApi()" class="btn btn-success btn-lg">Bắt đầu đo kết quả</button>-->
@@ -216,8 +216,8 @@ Phiếu đo dung phế
                 + currentdate.getDate() + "/"
                 + (currentdate.getMonth()+1)  + "/"
                 + currentdate.getFullYear();
-			originValue += time;
-			//console.log(originValue);
+            originValue += time;
+            //console.log(originValue);
 
             window.postMessage({
                 type: "CREATE_SIGNATURE_REQUEST",

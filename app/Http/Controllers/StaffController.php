@@ -324,6 +324,7 @@ class StaffController extends Controller {
 //$number = DB::table('user_infomation')->where('user_id', Auth::user()->id)->first()->phongban_id;
         $number = DB::table('staffs')->where('staff_id', Auth::user()->id)->first()->phongban;
         $medicial_list = $this->medicial_mng->getListTestMedicialToday(MedicialManagement::AWAIT_STATUS, $number);
+        // print_r($medicial_list);
         return $medicial_list;
     }
 
@@ -883,7 +884,7 @@ class StaffController extends Controller {
         // $port = $json['sensor'][0]['portCoAP'];
         // $addr = $json['addr'];
 
-        // $om2m = $api->ApiResult($department, $port, $addr);
+        $om2m = $api->ApiResult('123', '123', '123');
         // $FVC = $om2m['FVC'];
         // $FEV1 = $om2m['FEV1'];
         // $PEF = $om2m['PEF'];
@@ -892,7 +893,8 @@ class StaffController extends Controller {
         $FVC = 10;
         $FEV1 = 80;
         $PEF = 70;
-        return response()->json(array('FVC' => $FVC, 'FEV1' => $FEV1, 'PEF' => $PEF), 200);
+        // print_r($om2m);
+        return response()->json(array('flag'=>1,'data' => $om2m), 200);
     }
 
     public function getAPIData() {

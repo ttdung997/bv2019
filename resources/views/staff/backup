@@ -112,86 +112,31 @@ Phiếu đo dung phế
 
         </div></div>
      <br>
-     <h2>Phiếu xét ngiểm tổng hợp</h2>
-     <h3 class="col-md-offset-3">Kết quả Nhiệt độ</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_tem" class="col-md-2 control-label">Nhiệt độ :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_tem" value="" >
-            </div>
-        </div>
-    </div>
-    <h3 class="col-md-offset-3">Kết quả Đo phế dung phổi</h3>
+    <h2 class="col-md-offset-3">Kết quả Đo phế dung phổi</h2>
     <div id = "theluc" class="">
         <div class="form-group">
         <input type="hidden" name="id" class="form-control" id="123" value="{{$benhnhan_id}}" >
         <input type="hidden" name="name" class="form-control" id="123" value="{{$ten_benh_nhan}}" >
         <input type="hidden" name="birthday" class="form-control" id="123" value="{{$ngay_sinh}}" >
-            <label for="input_fev" class="col-md-2 control-label">FEV :</label>
+            <label for="input_FVC" class="col-md-2 control-label">FVC :</label>
             <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_fev" value="" >
+                <input type="text" name="FVC" class="form-control" id="input_FVC" value="{{$FVC}}" >
             </div>
         </div>
         <div class="form-group">
-            <label for="input_pef" class="col-md-2 control-label">PEF :</label>
+            <label for="input_FEV1" class="col-md-2 control-label">FEV1 :</label>
             <div class="col-md-6">
-                <input type="text" name="FEV1" class="form-control" id="input_pef" value="" >
-            </div>
-        </div>
-    </div>
-    <h3 class="col-md-offset-3">Kết quả đo nồng độ máu</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_systolic" class="col-md-2 control-label">Systolic BP :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_systolic" value="" >
-            </div>
-        </div>
-         <div class="form-group">
-            <label for="input_diastolic" class="col-md-2 control-label">Diastolic BP :</label>
-            
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_diastolic" value="" >
+                <input type="text" name="FEV1" class="form-control" id="input_FEV1" value="{{$FEV1}}" >
             </div>
         </div>
         <div class="form-group">
-            <label for="input_diastolic" class="col-md-2 control-label">Pulse BP :</label>
-            
+            <label for="input_PEF" class="col-md-2 control-label">PEF :</label>
             <div class="col-md-6">
-                <input type="text" name="pulse" class="form-control" id="input_pulse" value="" >
-            </div>
-        </div>
-    </div> 
-    <h3 class="col-md-offset-3">Kết quả đo nhịp thở</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_air" class="col-md-2 control-label">Air :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_air" value="" >
-            </div>
-        </div>
-         <div class="form-group">
-            <label for="input_ppm" class="col-md-2 control-label">PPM :</label>
-            
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_ppm" value="" >
-            </div>
-        </div>
-    </div>
-     <h3 class="col-md-offset-3">Kết quả đo nồng độ Oxy trong máu</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_o2" class="col-md-2 control-label">%SpO2 :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_o2" value="" >
-            </div>
-        </div>
-         <div class="form-group">
-            <label for="input_bpm" class="col-md-2 control-label">PRbmp :</label>
-            
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_bpm" value="" >
+                <input type="text"  name="PEF" class="form-control" id="input_PEF" value="{{$PEF}}" >
+                <?php
+                $room = DB::table('staffs')->where('staff_id', Auth::user()->id)->first()->phongban;
+                ?>
+                <input type="hidden" name="room" value="<?= $room ?>" >
             </div>
         </div>
     </div>
@@ -239,8 +184,8 @@ Phiếu đo dung phế
         <input type="hidden" name="medicalID" value="<?php echo($medical_id); ?>">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" id="signatureValue" name="signatureValue">
-        <input type="hidden" id="signDatetime" name="signDatetime">
-        <input type="hidden" id="certificate" name="certificate">
+		<input type="hidden" id="signDatetime" name="signDatetime">
+		<input type="hidden" id="certificate" name="certificate">
         <div class="col-md-offset-4">
             <label>Hoàn thiện</label><input type="checkbox" value="1" name="checkSubmit" id="checkSubmit">
             <!--<button type="button" onclick="getApi()" class="btn btn-success btn-lg">Bắt đầu đo kết quả</button>-->
@@ -259,7 +204,7 @@ Phiếu đo dung phế
             e.preventDefault();
 
             var originValue = '';
-            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
+            $('#COPDForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
                 originValue += $(this).val();
             });
             originValue += {{ Auth::user()->id }};
@@ -271,8 +216,8 @@ Phiếu đo dung phế
                 + currentdate.getDate() + "/"
                 + (currentdate.getMonth()+1)  + "/"
                 + currentdate.getFullYear();
-            originValue += time;
-            //console.log(originValue);
+			originValue += time;
+			//console.log(originValue);
 
             window.postMessage({
                 type: "CREATE_SIGNATURE_REQUEST",
@@ -284,17 +229,23 @@ Phiếu đo dung phế
                     return;
 
                 if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
+                    // console.log(event);
+                    // console.log(event.data.enhancedKeyUsage);
                     if (event.data.success) {
                         if (event.data.signature !== null) {
-                            alert("Đã ký phiếu đo!");
-                            $('#signatureValue').val(event.data.signature);
-                            $('#signDatetime').val(time);
-                            $('#certificate').val(event.data.certificate);
-                            $('#COPDForm :input:not([type=hidden]):not([readonly])').each(function (index) {
-                                $(this).prop("readonly", true);
-                            });
-                            $('#signBtn').prop("disabled", true);
-                            $('#saveBtn').prop("disabled", false);
+                            if(event.data.enhancedKeyUsage == 3){
+                                alert("Đã ký phiếu đo!");
+                                $('#signatureValue').val(event.data.signature);
+                                $('#signDatetime').val(time);
+                                $('#certificate').val(event.data.certificate);
+                               $('#COPDForm :input:not([type=hidden]):not([type=checkbox]):not([readonly]):not([disabled])').each(function (index) {
+                                    $(this).prop("readonly", true);
+                                });
+                                $('#signBtn').prop("disabled", true);
+                                $('#saveBtn').prop("disabled", false);
+                            }else{
+                                alert("Chứng thư đã chọn không phù hợp cho tài liệu này");
+                            }
                         } else {
                             alert("Chứng thư đã chọn không được dùng để ký!");
                         }
@@ -435,22 +386,15 @@ Phiếu đo dung phế
     function getDataFromMobile(){
          $.ajax({
             type: 'GET',
-            url: '/staff/get_API_result',
+            url: '/staff/get_data_mobile/<?=$medical_id?>',
             async: false,
             data: '_token = <?php echo csrf_token() ?>',
             success: function (data) {
-                console.log(data.data);
+                console.log(data);
                 if(data.flag > 0){
-                    document.getElementById('input_tem').value =data.data[0]['temperature'];
-                    document.getElementById('input_diastolic').value =data.data[1]['diastolic'];
-                    document.getElementById('input_systolic').value =data.data[1]['systolic'];
-                    document.getElementById('input_pulse').value =data.data[1]['pulse'];
-                    document.getElementById('input_pef').value =data.data[2]['pef'];
-                    document.getElementById('input_fev').value =data.data[2]['fev'];
-                    document.getElementById('input_air').value =data.data[3]['air'];
-                    document.getElementById('input_ppm').value =data.data[3]['ppm'];
-                    document.getElementById('input_bpm').value =data.data[4]['bpm'];
-                    document.getElementById('input_o2').value =data.data[4]['o2'];
+                    document.getElementById('input_FVC').value = data.data.FVC;
+                    document.getElementById('input_FEV1').value = data.data.FEV1;
+                    document.getElementById('input_PEF').value = data.data.PEF;
                 }else{
                     alert("không thể lấy dữ liệu từ thiết bị")
                 }

@@ -326,45 +326,64 @@ class ApiManagement {
     }
 
     public function ApiResult($department, $port, $addr) {
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_PORT => PORT,
-            CURLOPT_URL => HOST . ":" . PORT
-            . "/~/mn-cse/mn-name/SOICT?"
-            . "op=current_pulse&ipaddr=" . $addr . "&port=" . $port,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_HTTPHEADER => array(
-                "cache-control: no-cache",
-                "origin: " . HOST . ":" . PORT,
-                "user-agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
-                "x-m2m-origin: admin:admin",
-                "x-requested-with: XMLHttpRequest"
-            ),
-        ));
+        $data = [];
+        // for($i=1;$i<6;$i++){
+        //     print(HOST . ":" . PORT
+        //         . "/~/mn-cse/mn-name/SOICT?op=sensor_data&ipaddr=192.168.0.110&macaddr=null&room=null&department=null&port=20000&data=".$i);
+        //     print("<br>");
+        //     $curl = curl_init();
+        //     curl_setopt_array($curl, array(
+        //         CURLOPT_PORT => PORT,
+        //         // CURLOPT_URL => HOST . ":" . PORT
+        //         // . "/~/mn-cse/mn-name/SOICT?"
+        //         // . "op=current_pulse&ipaddr=" . $addr . "&port=" . $port,
+        //         CURLOPT_URL => HOST . ":" . PORT
+        //         . "/~/mn-cse/mn-name/SOICT?op=sensor_data&ipaddr=192.168.0.110&macaddr=null&room=null&department=null&port=20000&data=".$i,
+        //         CURLOPT_RETURNTRANSFER => true,
+        //         CURLOPT_ENCODING => "",
+        //         CURLOPT_MAXREDIRS => 10,
+        //         CURLOPT_TIMEOUT => 70,
+        //         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //         CURLOPT_SSL_VERIFYPEER => false,
+        //         CURLOPT_CUSTOMREQUEST => "POST",
+        //         CURLOPT_HTTPHEADER => array(
+        //             "cache-control: no-cache",
+        //             "origin: " . HOST . ":" . PORT,
+        //             "user-agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
+        //             "x-m2m-origin: admin:admin",
+        //             "x-requested-with: XMLHttpRequest"
+        //         ),
+        //     ));
 
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
+        //     $response = curl_exec($curl);
+        //     // print_r($response);
+        //     $err = curl_error($curl);
 
-        curl_close($curl);
+        //     curl_close($curl);
 
-        if ($err) {
-            $msg = "cURL Error #:" . $err;
-        } else {
-            //$msg= $response;
-            $xml = simplexml_load_string($response);
-            $FVC = $xml->int[0]->attributes()->val[0];
-            $FEV1 = $xml->int[1]->attributes()->val[0];
-            $PEF = $xml->int[2]->attributes()->val[0];
-        }
-        $data['FVC'] = $FVC;
-        $data['FEV1'] = $FEV1;
-        $data['PEF'] = $PEF;
+        //     if ($err) {
+        //         $msg = "cURL Error #:" . $err;
+        //     } else {
+        //         //$msg= $response;
+        //         // $xml = simplexml_load_string($response);
+        //         // $FVC = $xml->int[0]->attributes()->val[0];
+        //         // $FEV1 = $xml->int[1]->attributes()->val[0];
+        //         // $PEF = $xml->int[2]->attributes()->val[0];
+        //         $data[] = json_decode($response, true);
+        //     }
+        // }
+        // print_r($data);
+         // Array ( [0] => Array ( [temperature] => 7 ) [1] => Array ( [diastolic] => 4 [systolic] => 5 [pulse] => 6 ) [2] => Array ( [pef] => 4 [fev] => 5 ) [3] => Array ( [air] => 4 [ppm] => 5 ) [4] => Array ( [bpm] => 4 [o2] => 5 )
+        $data[0]['temperature'] = 7;
+        $data[1]['diastolic'] = 4;
+        $data[1]['systolic'] = 5;
+        $data[1]['pulse'] = 6;
+        $data[2]['pef'] = 4;
+        $data[2]['fev'] = 5;
+        $data[3]['air'] = 4;
+        $data[3]['ppm'] = 5;
+        $data[4]['bpm'] = 4;
+        $data[4]['o2'] = 5;
         return $data;
     }
     public function ApiTemResult($department, $port, $addr) {
