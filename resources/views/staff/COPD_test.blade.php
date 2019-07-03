@@ -233,7 +233,8 @@ Phiếu đo dung phế
                     // console.log(event.data.enhancedKeyUsage);
                     if (event.data.success) {
                         if (event.data.signature !== null) {
-                            if(event.data.enhancedKeyUsage == 3){
+                            console.log(event.data.enhancedKeyUsage)
+                            if(event.data.enhancedKeyUsage == '1.2.3.4.5.6.3'){
                                 alert("Đã ký phiếu đo!");
                                 $('#signatureValue').val(event.data.signature);
                                 $('#signDatetime').val(time);

@@ -718,7 +718,7 @@ class StaffController extends Controller {
                 return redirect('staff/listCompeleteTestPatient');
             }
         } else {
-            //return redirect('staff/listWaitingTestPatient');
+            return redirect('staff/listWaitingTestPatient');
             "lệnh sap sai!";
         }
     }

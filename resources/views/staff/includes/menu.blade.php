@@ -28,10 +28,10 @@
     </a>
 </li>
 <?php 
-    $_COOKIE['cert']=1;
+    # $_COOKIE['cert']=1;
     if(!Request::is('staff/index')){
         if(!isset($_COOKIE['cert'])) {
-            header('Location: /staff');
+            header('Location: /staff/index');
             die();
         }
     }

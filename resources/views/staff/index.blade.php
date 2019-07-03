@@ -20,7 +20,11 @@ Xin chào {{ Auth::user()->name }}
         width: 60%;
     }
 </style>
-
+<?php 
+        if(isset($_COOKIE['cert'])) {
+            $checkCert =-1;
+        }
+?>
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 $chucvu = DB::table('staffs')->where('staff_id', Auth::user()->id)->first()->chucvu;
@@ -74,13 +78,13 @@ if ($chucvu == 11) {
           <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title">Xác thực bằng chữ ký</h4>
         </div>
-        <form>
+        
         <div class="modal-body">
           <p>Hãy xác thực bằng chữ ký số của bạn!</p>
         </div>
         <div class="modal-footer"><button class="btn btn-primary btn-lg" id="signBtn">Xác thực</button>
                 
-        </div></form>
+        </div>
       </div>
   </div>
      
@@ -120,6 +124,50 @@ if ($chucvu == 11) {
                 }
             });
         }
-        document.getElementById('settingButton').click();
+        // document.getElementById('settingButton').click();
+    
+
+        $(document).ready(function(){
+        
+        
+
+        $('#signBtn').on('click', function(e){
+            e.preventDefault();
+
+            window.postMessage({
+                type: "CREATE_SIGNATURE_REQUEST",
+                originValue: "123456"
+            }, "*");
+
+            window.addEventListener("message", function (event) {
+                if (event.source != window)
+                    return;
+
+                if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
+                    if (event.data.success) {
+                          $.ajax({
+                            type: 'POST',
+                            url: '/checkUserCert',
+                            data:{id:<?=Auth::user()->id?>, sign:event.data.signature,_token:'<?php echo csrf_token() ?>'},
+                            success: function (data) {
+                                console.log(data);
+                                if(data.flag ==0){
+                                    alert("Xác thực thành công!");
+                                }else {
+                                    alert("Xác thực không thành công!");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        alert("Xác thực không thành công!");
+                    }
+                }
+            })
+        });
+
+    });
+
     </script>
+
 @stop

@@ -24,6 +24,7 @@ Quản lý bệnh nhân
                                 data-formatter="operateFormatter"
                                 data-events="operateEvents"
                                 >Chi tiết</th>
+                                <th data-field="id" data-sortable="false" data-formatter="buttonCheckMedicalTestApplication">Kiểm tra</th>
                         </tr>
                     </thead>
                 </table>
@@ -124,5 +125,17 @@ Quản lý bệnh nhân
             value.substring(0, 10)
         ]
     }
+    function buttonCheckMedicalTestApplication(value, row, index) {
+            return [
+                '<button class="btn btn-default" onClick="checkMedicalTestApplication(',
+                value,
+                ')">Kiểm tra</button>'
+            ].join('');
+        }
+        function checkMedicalTestApplication(id) {
+            $.get('/checkMedicalTestApplication/' + id, function (data) {
+                alert(data);
+            });
+        }
 </script>
 @stop

@@ -34,6 +34,10 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // $cookie_name = 'cert';
+        // unset($_COOKIE[$cookie_name]);
+        // // empty value and expiration one hour before
+        // $res = setcookie($cookie_name, '', time() - 3600);
         //return redirect()->route('patient-index');
         if(Auth::user()->position == UserManagement::PATIENT_POSITION){
             return redirect()->route('patient-index');
@@ -298,8 +302,11 @@ class HomeController extends Controller
             $phe_dung = $medical_application_xml->phe_dung;
             if(!empty($phe_dung->chu_ky)) {
                 $originValue = $phe_dung->FVC . $phe_dung->FEV1 . $phe_dung->PEF . $phe_dung->nhan_vien_ky . $phe_dung->thoi_diem_ky;
-                $certificate = Certificate::findOrFail($phe_dung->chung_thu_ky);
-
+                
+                $certificate = Certificate::where('id',$phe_dung->chung_thu_ky)->first();
+                if($certificate == NULL) {
+                    return  'Chứng thư số đã hết hạn';
+                }
                 if($this->checkCertNotBelongToUser($phe_dung->nhan_vien_ky, $phe_dung->chung_thu_ky))
                     return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' không thuộc về nhân viên '.User::findOrFail($phe_dung->nhan_vien_ky)->name.'!';
 

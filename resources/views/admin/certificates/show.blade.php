@@ -27,7 +27,7 @@ Chi tiết  chữ ký số
                 </div>
             </div>
             <div class="col-md-2 mt-4 pt-1">
-                <a class="btn btn-info" href="{{ route('adminCertIndex') }}">Quay lại</a>
+                <a class="btn btn-info" href="{{ route('admin-request-index') }}">Quay lại</a>
             </div>
         </div>
         <div class="row mt-5">
