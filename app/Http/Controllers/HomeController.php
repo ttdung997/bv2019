@@ -34,11 +34,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // $cookie_name = 'cert';
-        // unset($_COOKIE[$cookie_name]);
-        // // empty value and expiration one hour before
-        // $res = setcookie($cookie_name, '', time() - 3600);
-        //return redirect()->route('patient-index');
+        $cookie_name = 'cert';
+        unset($_COOKIE[$cookie_name]);
+        // empty value and expiration one hour before
+        $res = setcookie($cookie_name, '', time() - 3600);
+        // return redirect()->route('patient-index');
         if(Auth::user()->position == UserManagement::PATIENT_POSITION){
             return redirect()->route('patient-index');
         }
