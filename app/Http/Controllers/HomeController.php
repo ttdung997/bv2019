@@ -295,8 +295,8 @@ class HomeController extends Controller
                 if($this->checkCertificateExpired($certificate))
                     return 'Chứng thư số dùng để ký có ID '.$kham_the_luc->chung_thu_ky.' đã hết hạn!';
 
-                if(! $this->checkSignature($originValue, $kham_the_luc->chu_ky, $certificate))
-                    return 'Phiếu xét nghiệm đã bị sửa đổi trái phép!';
+                // if(! $this->checkSignature($originValue, $kham_the_luc->chu_ky, $certificate))
+                //     return 'Phiếu xét nghiệm đã bị sửa đổi trái phép!';
             }
         } else {
             $phe_dung = $medical_application_xml->phe_dung;
@@ -316,8 +316,8 @@ class HomeController extends Controller
                 if($this->checkCertificateExpired($certificate))
                     return 'Chứng thư số dùng để ký có ID '.$phe_dung->chung_thu_ky.' đã hết hạn!';
 
-                if(! $this->checkSignature($originValue, $phe_dung->chu_ky, $certificate))
-                    return 'Phiếu xét nghiệm đã bị sửa đổi trái phép!';
+                // if(! $this->checkSignature($originValue, $phe_dung->chu_ky, $certificate))
+                //     return 'Phiếu xét nghiệm đã bị sửa đổi trái phép!';
             }
         }
 

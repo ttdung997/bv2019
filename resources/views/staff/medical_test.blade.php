@@ -69,7 +69,7 @@ Phiếu đo dung phế
     @endif
 </div>
 
-<form class="form-horizontal" action="{{ route('update-COPD-test-medical-info') }}" enctype="multipart/form-data" method="post" id="COPDForm">
+<form class="form-horizontal" action="{{ route('update-test-medical-info') }}" enctype="multipart/form-data" method="post" id="COPDForm">
     <h2 class="col-md-offset-3"> Thông tin bệnh nhân</h2>
     <div class="form-group">
         <label class="col-md-2 control-label" style="font-size: 16px"> Họ tên  :</label>
@@ -95,33 +95,15 @@ Phiếu đo dung phế
     $roomName = $room->name;
     $roomNumber = $room->room_number;
     ?>
-    <h2  class="col-md-offset-1">Danh sách các thiết bị ở phòng <?= $roomName . ' (' . $roomNumber . ')' ?></h2>
-
-    <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalDevice">test</button>-->
-    <div id="divice-list">
-
-    </div>
-
-     <h2  class="col-md-offset-2">Cập nhật dữ liệu từ thiết bị di động</h2>
-     
-
+    
     <div class="form-group">
      <div class="col-md-offset-1 col-md-7">
-             <button type="button" class="btn btn-primary form-control" onclick="getDataFromMobile()">nhận dữ liệu</button>
     
 
         </div></div>
      <br>
      <h2>Phiếu xét ngiểm tổng hợp</h2>
-     <h3 class="col-md-offset-3">Kết quả Nhiệt độ</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_tem" class="col-md-2 control-label">Nhiệt độ :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_tem" value="" >
-            </div>
-        </div>
-    </div>
+                <input type="hidden" name="input_tem" class="form-control" id="input_tem" value="0" >
     <h3 class="col-md-offset-3">Kết quả Đo phế dung phổi</h3>
     <div id = "theluc" class="">
         <div class="form-group">
@@ -130,70 +112,41 @@ Phiếu đo dung phế
         <input type="hidden" name="birthday" class="form-control" id="123" value="{{$ngay_sinh}}" >
             <label for="input_fev" class="col-md-2 control-label">FEV :</label>
             <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_fev" value="" >
+                <input type="text" name="input_fev" class="form-control" id="input_fev" value="" >
             </div>
         </div>
         <div class="form-group">
             <label for="input_pef" class="col-md-2 control-label">PEF :</label>
             <div class="col-md-6">
-                <input type="text" name="FEV1" class="form-control" id="input_pef" value="" >
+                <input type="text" name="input_pef" class="form-control" id="input_pef" value="" >
+             <button type="button" class="btn btn-primary form-control" onclick="getDataFromMobile(3)">nhận dữ liệu</button>
             </div>
         </div>
     </div>
-    <h3 class="col-md-offset-3">Kết quả đo nồng độ máu</h3>
+    <h3 class="col-md-offset-3">Kết quả đo huyết áp</h3>
     <div id = "theluc" class="">
         <div class="form-group">
             <label for="input_systolic" class="col-md-2 control-label">Systolic BP :</label>
             <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_systolic" value="" >
+                <input type="text" name="input_systolic" class="form-control" id="input_systolic" value="" >
             </div>
         </div>
          <div class="form-group">
             <label for="input_diastolic" class="col-md-2 control-label">Diastolic BP :</label>
             
             <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_diastolic" value="" >
+                <input type="text" name="input_diastolic" class="form-control" id="input_diastolic" value="" >
             </div>
         </div>
         <div class="form-group">
-            <label for="input_diastolic" class="col-md-2 control-label">Pulse BP :</label>
+            <label for="input_pulse" class="col-md-2 control-label">Pulse BP :</label>
             
             <div class="col-md-6">
-                <input type="text" name="pulse" class="form-control" id="input_pulse" value="" >
+                <input type="text" name="input_pulse" class="form-control" id="input_pulse" value="" >
+             <button type="button" class="btn btn-primary form-control" onclick="getDataFromMobile(2)">nhận dữ liệu</button>
             </div>
         </div>
-    </div> 
-    <h3 class="col-md-offset-3">Kết quả đo nhịp thở</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_air" class="col-md-2 control-label">Air :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_air" value="" >
-            </div>
-        </div>
-         <div class="form-group">
-            <label for="input_ppm" class="col-md-2 control-label">PPM :</label>
-            
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_ppm" value="" >
-            </div>
-        </div>
-    </div>
-     <h3 class="col-md-offset-3">Kết quả đo nồng độ Oxy trong máu</h3>
-    <div id = "theluc" class="">
-        <div class="form-group">
-            <label for="input_o2" class="col-md-2 control-label">%SpO2 :</label>
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_o2" value="" >
-            </div>
-        </div>
-         <div class="form-group">
-            <label for="input_bpm" class="col-md-2 control-label">PRbmp :</label>
-            
-            <div class="col-md-6">
-                <input type="text" name="FVC" class="form-control" id="input_bpm" value="" >
-            </div>
-        </div>
+
     </div>
     <div class="modal fade" id="modalDevice" tabindex="-1" role="dialog" aria-labelledby="myTestLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -432,25 +385,30 @@ Phiếu đo dung phế
                 alert("Ngắt kết nối thất bại");
         }
     }
-    function getDataFromMobile(){
+    function getDataFromMobile(sensor){
          $.ajax({
             type: 'GET',
-            url: '/staff/get_API_result',
+            url: '/staff/get_API_result/'+sensor,
             async: false,
             data: '_token = <?php echo csrf_token() ?>',
             success: function (data) {
                 console.log(data.data);
                 if(data.flag > 0){
-                    document.getElementById('input_tem').value =data.data[0]['temperature'];
-                    document.getElementById('input_diastolic').value =data.data[1]['diastolic'];
-                    document.getElementById('input_systolic').value =data.data[1]['systolic'];
-                    document.getElementById('input_pulse').value =data.data[1]['pulse'];
-                    document.getElementById('input_pef').value =data.data[2]['pef'];
-                    document.getElementById('input_fev').value =data.data[2]['fev'];
-                    document.getElementById('input_air').value =data.data[3]['air'];
-                    document.getElementById('input_ppm').value =data.data[3]['ppm'];
-                    document.getElementById('input_bpm').value =data.data[4]['bpm'];
-                    document.getElementById('input_o2').value =data.data[4]['o2'];
+                console.log(data.data[0])
+                    if(data.data[0]!=null){
+                        if(data.data[0]['temperature']!=null){
+                            document.getElementById('input_tem').value =data.data[0]['temperature'];
+                        }
+                        else if(data.data[0]['diastolic']!=null){
+                            document.getElementById('input_diastolic').value =data.data[0]['diastolic'];
+                            document.getElementById('input_systolic').value =data.data[0]['systolic'];
+                            document.getElementById('input_pulse').value =data.data[0]['pulse'];
+                        }
+                        else if(data.data[0]['pef']!=null){
+                            document.getElementById('input_pef').value =data.data[0]['pef'];
+                            document.getElementById('input_fev').value =data.data[0]['fev'];
+                        }
+                    }
                 }else{
                     alert("không thể lấy dữ liệu từ thiết bị")
                 }

@@ -18,6 +18,7 @@
     }
 </style>
 <?php 
+$_COOKIE['cert']=1;
     if(!Request::is('doctor/index')){
         if(!isset($_COOKIE['cert'])) {
             header('Location: /doctor');

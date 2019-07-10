@@ -140,6 +140,7 @@ class MedicialManagement {
                         ->select('medical_test_applications.id', 'medical_test_applications.date', 'medical_test_type.name', 'patients.fullname as usersname', 'medical_test_applications.status')
                         ->where('medical_test_applications.status', $status)
                         ->orderBy('medical_test_applications.medical_date', 'desc')->get();
+
         return $list_medicial;
     }
 
@@ -151,7 +152,6 @@ class MedicialManagement {
                         ->join('patients', 'medical_test_applications.patient_id', '=', 'patients.patient_id')
                         ->select('medical_test_applications.id', 'medical_test_applications.date', 'medical_test_applications.medical_date', 'medical_test_type.name', 'patients.fullname as usersname', 'medical_test_applications.status')
                         ->where('medical_test_applications.status', $status)
-                        ->where('medical_test_type.phongban', $number)
                         ->where('medical_test_applications.medical_date', Carbon::now()->toDateString())
                         ->orderBy('medical_test_applications.date', 'asc')->get();
 

@@ -101,7 +101,7 @@ Quản lý bệnh nhân
                 });
             }else{
                   $table.bootstrapTable('refresh', {
-                    url: '../../staff/COPDtestDetail.json/' + value
+                    url: '../../staff/testDetail.json/' + value
                 });
             }
         },

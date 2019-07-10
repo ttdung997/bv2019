@@ -5,10 +5,15 @@
 		<ten_benh_nhan></ten_benh_nhan>
 		<ngay_sinh></ngay_sinh>
 	</thong_tin_ca_nhan>
-	<kham_the_luc>
-		<chieu_cao></chieu_cao>
-		<can_nang></can_nang>
-		<huyet_ap></huyet_ap>
-	</kham_the_luc>
+	<nhiet_do></nhiet_do>
+	<dung_phe>
+		<FEV></FEV>
+		<PEF></PEF>
+	</dung_phe>
+	<huyet_ap>
+		<Systolic></Systolic>
+		<Diastolic></Diastolic>
+		<Pulse></Pulse>
+	</huyet_ap>
 	
 </don_kham>

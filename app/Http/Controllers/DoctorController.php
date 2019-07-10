@@ -702,8 +702,7 @@ class DoctorController extends Controller {
                 $medical_application->register_by = 2;
 
                 $medical_application->medical_date = $request->medical_date;
-                $medical_application->date = date("Y-m-d H:i:s");
-                $medical_application->save();
+                // $medical_application->date = date("Y-m-d H:i:s");
                 $method = config('encrypt.method');
                 $global_key = base64_decode(config('encrypt.key'));
                 $iv = base64_decode(config('encrypt.iv'));
@@ -825,15 +824,21 @@ class DoctorController extends Controller {
     public function medical_test_detail_as_json($id) {
         $medical = MedicalTestApplication::where('id', $id)->first();
         $xetnghiem = $medical->xetnghiem;
+        $method = config('encrypt.method');
+        $global_key = base64_decode(config('encrypt.key'));
+        $iv = base64_decode(config('encrypt.iv'));
         try {
+
             $contents = Storage::get($medical->url);
         } catch (\Exception $e) {
             return "Không tìm thấy file đơn khám";
         }
-
-
-        $medical_application_xml = simplexml_load_string($contents);
-        $data = ((array) $medical_application_xml);
+        $key = MedicalTestApplication::where('id', $id)->first()->xml_key;
+        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+        
+        $medical = simplexml_load_string($contents);
+        $data = ((array) $medical);       
         if ($xetnghiem != 4) {
             return view('json.test')->with($data);
         } else {
@@ -884,7 +889,6 @@ class DoctorController extends Controller {
 
                 $medical_application->medical_date = Carbon::now()->toDateString();
                 $medical_application->date = date("Y-m-d H:i:s");
-                $medical_application->save();
                 // Storage::copy('XN_chieucao.xml', $url);
 
                 

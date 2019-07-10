@@ -195,10 +195,29 @@ class StaffController extends Controller {
             $medical_application->khoa = $request->khoa;
             $medical_application->Shift = $Shift;
             $medical_application->medical_type = $request->medical_type;
-            $medical_application->url = $url;
+            $medical_application->url = $url; 
+
+            $contents = Storage::get("donkham-plaintext.xml");  
+            $method = config('encrypt.method');
+            $global_key = base64_decode(config('encrypt.key'));
+            $iv = base64_decode(config('encrypt.iv'));
+
+            $key = Keygen::bytes(256)->generate();
+
+            $ekey = openssl_encrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+
+
+            $medical_application->xml_key = $ekey;
+
+            $medical_application->Shift = $request->Shift;
+
+            $medical_application->medical_date = $request->medical_date;
             $medical_application->date = date("Y-m-d H:i:s");
-            $medical_application->save();
-            Storage::copy('donkham.xml', $url);
+            $medical_application->save();    
+            $resource = openssl_encrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+
+
+            Storage::put($url, $resource);
 
             return Response::json(['flash_message' => 'Đã đăng ký khám cho bệnh nhân này!', 'message_level' => 'success', 'message_icon' => 'check']);
         } else {
@@ -241,8 +260,23 @@ class StaffController extends Controller {
                 $medical_application->Shift = $Shift;
 
                 $medical_application->medical_date = $request->medical_date;
+                $method = config('encrypt.method');
+                $global_key = base64_decode(config('encrypt.key'));
+                $iv = base64_decode(config('encrypt.iv'));
+
+                $key = Keygen::bytes(256)->generate();
+
+                $ekey = openssl_encrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+            
+
+                $medical_application->xml_key = $ekey;
+
+                $medical_application->Shift = $Shift;
+
+                $medical_application->medical_date = $request->medical_date;
                 $medical_application->date = date("Y-m-d H:i:s");
                 $medical_application->save();
+
 
 
                 $contents = Storage::get("COPD-plaintext.xml");
@@ -548,16 +582,18 @@ class StaffController extends Controller {
 
 //ghi dữ liệu xét nghiệm
     public function updateTestMedicalInfo(Request $request) {
+        $medical_id = $request->input('medicalID');
+        // die();
         $inputCertificate = $request->input('certificate');
         $pemCertificate = chunk_split($inputCertificate, 64, "\n");
         $pemCertificate = "-----BEGIN CERTIFICATE-----\n" . $pemCertificate . "-----END CERTIFICATE-----\n";
-        $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumber'])->first();
+        $certificate = Certificate::where('serial_number', openssl_x509_parse($pemCertificate)['serialNumberHex'])->first();
+        print_r(openssl_x509_parse($pemCertificate)['serialNumberHex']);
         $staffId = Auth::id();
         $signature = $request->input('signatureValue');
         $signDatetime = $request->input('signDatetime');
-
         if(is_null($certificate))
-            return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
+            return redirect()->route('medical_exam_by_id', ['id' => $request->input('medicalID')])->with(['flash_message' => 'Chứng thư số dùng để ký chưa được đăng ký với hệ thống!', 'message_level' => 'danger']);
 
         if($certificate->status != 0)
             return redirect()->route('medical_exam_by_id', ['id' => $medical_id])->with(['flash_message' => 'Chứng thư số dùng để ký đã bị thu hồi!', 'message_level' => 'danger']);
@@ -573,18 +609,33 @@ class StaffController extends Controller {
 
         $medical_id = $request->input('medicalID');
         $medical = MedicalTestApplication::join('medical_test_type', 'medical_test_applications.xetnghiem', '=', 'medical_test_type.id')
-                        ->where('medical_test_type.phongban', $request->input('room'))
                         ->where('medical_test_applications.id', $medical_id)->first();
-        $contents = Storage::get($medical->url);
+        $contents = Storage::get($medical->url); 
+        $method = config('encrypt.method');
+        $global_key = base64_decode(config('encrypt.key'));
+        $iv = base64_decode(config('encrypt.iv'));
+
+        $key = MedicalTestApplication::where('id', $medical_id)->first()->xml_key;
+        $key = openssl_decrypt($key, $method, $global_key, OPENSSL_RAW_DATA, $iv);
+        $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
+              
         $medical_application_xml = simplexml_load_string($contents);
 
 
-        $chieu_cao = $request->input('chieu_cao');
-        $medical_application_xml->kham_the_luc->chieu_cao = $chieu_cao;
-        $can_nang = $request->input('can_nang');
-        $medical_application_xml->kham_the_luc->can_nang = $can_nang;
-        $huyet_ap = $request->input('huyet_ap');
-        $medical_application_xml->kham_the_luc->huyet_ap = $huyet_ap;
+        $nhietdo = $request->input('input_tem');
+        $medical_application_xml->nhiet_do = $nhietdo;
+        $input_fev = $request->input('input_fev');
+        $medical_application_xml->phe_dung->FEV = $input_fev;
+        $input_pef = $request->input('input_pef');
+        $medical_application_xml->phe_dung->PEF = $input_pef;
+
+
+        $input_systolic = $request->input('input_systolic');
+        $medical_application_xml->huyet_ap->Systolic = $input_systolic;
+        $input_diastolic = $request->input('input_diastolic');
+        $medical_application_xml->huyet_ap->Diastolic = $input_diastolic;
+        $input_pulse = $request->input('input_pulse');
+        $medical_application_xml->huyet_ap->Pulse = $input_pulse;
 
         $medical_application_xml->kham_the_luc->chu_ky = $signature;
         $medical_application_xml->kham_the_luc->nhan_vien_ky = $staffId;
@@ -665,7 +716,8 @@ class StaffController extends Controller {
         $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
               
         $medical_application_xml = simplexml_load_string($contents);
-
+        // print_r($request->input());
+        // die();
 
         $FVC = $request->input('FVC');
         $medical_application_xml->phe_dung->FVC = $FVC;
@@ -741,6 +793,10 @@ class StaffController extends Controller {
         $contents = openssl_decrypt($contents, $method, $key, OPENSSL_RAW_DATA, $iv);
           
         $medical_application_xml = simplexml_load_string($contents);
+        // print_r($medical_application_xml);
+        // die();
+        $data = ((array) $medical_application_xml);
+        return view('json.test')->with($data);
     }
 
     public function medical_COPD_test_detail_as_json($id) {
@@ -824,10 +880,10 @@ class StaffController extends Controller {
     public function getAPIConnect($roomID) {
         $api = new ApiManagement();
 
-        $room = DB::table('user_room')->where('id', $roomID)->first();
-        $roomName = $room->name;
-        $department_id = $room->department;
-        $department = DB::table('departments')->where('id', $department_id)->first()->name;
+        // $room = DB::table('user_room')->where('id', $roomID)->first();
+        // $roomName = $room->name;
+        // $department_id = $room->department;
+        // $department = DB::table('departments')->where('id', $department_id)->first()->name;
 //        
 //       
 //        
@@ -839,12 +895,12 @@ class StaffController extends Controller {
 //        $MACAddr = $json['sensor'][0]['MACAddr'];
 //        $addr = $json['addr'];
 //        
-//        $om2m= $api->ApiConnect($department,$room,$addr,$MACAddr,$port);
-//        $msg=$om2m['msg'];
-//        $flag =$om2m['flag'];
-
+       $om2m= $api->ApiConnect('123','123','123','123','123');
+       $msg=$om2m['msg'];
+       $flag =$om2m['flag'];
+       sleep(30);
         $msg = "đã kết nối ";
-        $flag = 1;
+    $flag = 1;
 
         return response()->json(array('flag' => $flag, 'msg' => $msg), 200);
     }
@@ -860,7 +916,7 @@ class StaffController extends Controller {
 
         // $department = $api->stripVN($department);
         // $MACAddr = $json['sensor'][0]['MACAddr'];
-        // $om2m = $api->ApiDisconnect($department, $MACAddr);
+        $om2m = $api->ApiDisconnect("123","123");
 
 //        $msg = $om2m['msg'];
 //        $flag =$om2m['flag'];
@@ -870,7 +926,7 @@ class StaffController extends Controller {
         return response()->json(array('msg' => $msg, 'flag' => $flag), 200);
     }
 
-    public function getAPIResult() {
+    public function getAPIResult($sensor) {
         $msg = "đã nhận kết quả";
         $api = new ApiManagement();
 
@@ -884,7 +940,7 @@ class StaffController extends Controller {
         // $port = $json['sensor'][0]['portCoAP'];
         // $addr = $json['addr'];
 
-        $om2m = $api->ApiResult('123', '123', '123');
+        $om2m = $api->ApiResult($sensor);
         // $FVC = $om2m['FVC'];
         // $FEV1 = $om2m['FEV1'];
         // $PEF = $om2m['PEF'];

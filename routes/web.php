@@ -238,7 +238,7 @@ Route::group(['prefix' => 'staff'], function () {
             ->name('get_API_connect');
      Route::get('get_API_disconnect/{roomID}', 'StaffController@getAPIDisconnect')
             ->name('get_API_disconnect');
-     Route::get('get_API_result', 'StaffController@getAPIResult')
+     Route::get('get_API_result/{sensor}', 'StaffController@getAPIResult')
             ->name('get_API_result');
     Route::get('get_API_data', 'StaffController@getAPIData')
             ->name('get_API_data');

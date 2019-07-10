@@ -9,7 +9,7 @@
         "chi_so": "<?php echo ($phe_dung->FVC); ?>"       
     },
     {
-        "thong_tin": "FEV1",
+        "thong_tin": "FEV",
         "chi_so": "<?php echo ($phe_dung->FEV1); ?>"
     },
     {
