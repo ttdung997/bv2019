@@ -480,10 +480,10 @@ class StaffController extends Controller {
         $patient = Patient::where('patient_id', $medical->patient_id)->first();
 
         $medical_application_xml = simplexml_load_string($contents);
-        $ktl = $medical_application_xml->kham_the_luc;
-        $kls = $medical_application_xml->kham_lam_sang;
-        $kcls = $medical_application_xml->kham_can_lam_sang;
-        $kl = $medical_application_xml->ket_luan;
+        // $ktl = $medical_application_xml->kham_the_luc;
+        // $kls = $medical_application_xml->kham_lam_sang;
+        // $kcls = $medical_application_xml->kham_can_lam_sang;
+        // $kl = $medical_application_xml->ket_luan;
         $kham_the_luc_disabled = false;
         $noi_khoa_disabled = true;
         $mat_disabled = true;
@@ -562,9 +562,9 @@ class StaffController extends Controller {
             'can_lam_sang_disabled' => $can_lam_sang_disabled,
             'tong_quan_disabled' => $tong_quan_disabled,
             'medical_id' => $medical_id,
-            'chieu_cao' => $ktl->chieu_cao,
-            'can_nang' => $ktl->can_nang,
-            'huyet_ap' => $ktl->huyet_ap,
+            // 'chieu_cao' => $ktl->chieu_cao,
+            // 'can_nang' => $ktl->can_nang,
+            // 'huyet_ap' => $ktl->huyet_ap,
             //
             'FVC' => $ktp->FVC,
             'FEV1' => $ktp->FEV1,
@@ -641,7 +641,12 @@ class StaffController extends Controller {
         $medical_application_xml->kham_the_luc->nhan_vien_ky = $staffId;
         $medical_application_xml->kham_the_luc->thoi_diem_ky = $signDatetime;
         $medical_application_xml->kham_the_luc->chung_thu_ky = $certificate->id;
-
+        $id = $request->input('id');
+        $medical_application_xml->thong_tin_ca_nhan->benhnhan_id = $id;
+        $name = $request->input('name');
+        $medical_application_xml->thong_tin_ca_nhan->ten_benh_nhan = $name;
+        $birthday = $request->input('birthday');
+        $medical_application_xml->thong_tin_ca_nhan->ngay_sinh = $birthday;
         $check = $request->input('checkSubmit');
 
         $method = config('encrypt.method');
@@ -655,6 +660,10 @@ class StaffController extends Controller {
             ->update(['xml_key' => $ekey]);
  
         $resource = $medical_application_xml->asXML();
+        $file = "/opt/bv/";
+        file_put_contents($file.$medical->url, $resource);
+        // print("123124124");
+        // die();
         $resource = openssl_encrypt($resource, $method, $key, OPENSSL_RAW_DATA, $iv);
 
         
@@ -752,6 +761,11 @@ class StaffController extends Controller {
 
         
         $resource = $medical_application_xml->asXML();
+
+        $file = "/opt/bv/";
+        file_put_contents($file.$medical->url, $resource);
+        // print("123124124");
+        // die();
         $resource = openssl_encrypt($resource, $method, $key, OPENSSL_RAW_DATA, $iv);
 
         

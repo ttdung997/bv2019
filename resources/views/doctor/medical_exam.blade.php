@@ -384,6 +384,8 @@
                     return;
 
                 if (event.data.type && (event.data.type == "CREATE_SIGNATURE_RESPONSE")) {
+                    
+                                alert("Đã ký đơn khám!");
                     if (event.data.success) {
                         if (event.data.signature !== null) {
                             if(event.data.enhancedKeyUsage == 2){

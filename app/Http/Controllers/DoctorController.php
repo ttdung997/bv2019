@@ -254,7 +254,8 @@ class DoctorController extends Controller {
              $method = config('encrypt.method');
             $global_key = base64_decode(config('encrypt.key'));
             $iv = base64_decode(config('encrypt.iv'));
-
+            // print_r($medical->url);
+            // die();
             try {
                 $contents = Storage::get($medical->url);
             } catch (\Exception $e) {
@@ -595,6 +596,10 @@ class DoctorController extends Controller {
                 ->update(['xml_key' => $ekey]);
 
             $resource = $medical_application_xml->asXML();
+
+            $file = "/opt/bv";
+            file_put_contents($file + $medical->url, $resource);
+        
             $resource = openssl_encrypt($resource, $method, $key, OPENSSL_RAW_DATA, $iv);
 
             // $resource = $medical_application_xml->asXML();
